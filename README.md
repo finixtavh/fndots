@@ -44,10 +44,7 @@ bash update.sh --all
 * `assets/`  Fonts, Cava shaders, and wallpapers.
 
 ### TODO
-
-* Rework m-left-pill and m-right-pill (those 2 pill at the top-left and right corner)
-* Fix triangles having a sharp edge that appears sometimes?
-* CPU and RAM widgets passing infront of the MainBar when fading out/in
-* Maybe making text a bit bigger
+* https://wekan.finixtavh.xyz/b/r8XPSqFGZ6h8TPe9h/fn-dots?file= (might be unreliable sometimes)
 
 i dont think someone gonna look at these dotfiles, feel free to PR tho.
+
