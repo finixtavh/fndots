@@ -18,6 +18,7 @@ bash install.sh
 
 ```bash
 --no-backups // doesn't make any backup folder at .local/
+--keyboard=LAYOUT // configure custom keyboard for hyprland
 ```
 
 Backups are stored in:
