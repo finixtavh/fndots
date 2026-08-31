@@ -1,0 +1,2 @@
+-- keyboard
+return { layout = "latam" }

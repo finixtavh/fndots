@@ -1,0 +1,67 @@
+@use "tokens" as t;
+
+/* Music history */
+.panel-header {
+  font-size:   15px;
+  font-weight: 700;
+  color:       t.$accent;
+  letter-spacing: 1px;
+  padding:     2px 0;
+}
+
+.panel-row {
+  padding:       2px 0;
+  border-radius: t.$radius-sm;
+}
+
+.panel-row-btn {
+  background:    transparent;
+  border-radius: t.$radius-md;
+  padding:       0;
+  box-shadow:    none;
+  border:        none;
+  min-height:    0;
+
+  &:hover .panel-row { background: t.$bg-item-hover; }
+  &:active .panel-row { background: t.$bg-active; }
+}
+
+.panel-row-empty {
+
+  min-height: 65px;
+}
+
+.panel-no-data {
+  font-size:  12px;
+  color:      t.$text-dim;
+  font-style: italic;
+}
+
+.panel-art {
+  min-width:  16px;
+  min-height: 16px;
+  border-radius: t.$radius-xs;
+}
+
+.panel-song-title {
+  font-size:   13px;
+  font-weight: 600;
+  color:       t.$text-primary;
+  padding:     2px 0;
+}
+
+.panel-song-artist {
+  font-size: 12px;
+  color:     t.$text-secondary;
+  padding:   2px 0;
+}
+
+.panel-listen-time {
+  font-size: 11px;
+  color:     t.$accent;
+}
+
+.panel-url {
+  font-size: 11px;
+  color:     t.$text-dim;
+}

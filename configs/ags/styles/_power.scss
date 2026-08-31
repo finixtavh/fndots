@@ -1,0 +1,95 @@
+@use "sass:color";
+@use "tokens" as t;
+
+/* Power menu */
+window.PowerMenu {
+  background: transparent;
+}
+
+.power-menu-root {
+  @include t.glass-panel;
+  min-width: 600px;
+  padding: 0;
+}
+.power-menu-root separator {
+  min-height: 1px;
+  background: t.$border;
+}
+.power-menu-header {
+  min-height: 44px;
+  padding: 0 10px;
+}
+.power-menu-title {
+  color: t.$accent;
+  font-size: 13px;
+  font-weight: 700;
+}
+.power-menu-content {
+  padding: 16px;
+}
+.power-menu-buttons {
+  padding: 0;
+}
+.power-btn {
+  min-width: 100px;
+  min-height: 44px;
+  padding: 8px;
+  background: t.$bg-item;
+  border: 1px solid t.$border;
+  border-radius: t.$radius-lg;
+  box-shadow: none;
+}
+.power-btn:hover {
+  background: t.$bg-active;
+  border-color: t.$border-bright;
+}
+.power-btn:focus { box-shadow: inset 0 0 0 1px t.$border-bright; }
+.power-btn:active { background: t.$bg-active; }
+.power-btn:disabled { color: t.$text-dim; opacity: 0.55; }
+.power-label {
+  color: t.$text-secondary;
+  font-size: 12px;
+  font-weight: 500;
+}
+.power-btn:hover .power-label {
+  color: t.$text-primary;
+}
+
+.power-confirm-text {
+  color: t.$text-primary;
+  font-size: 15px;
+  font-weight: 600;
+}
+.power-confirm-btn {
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: t.$radius-lg;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: none;
+}
+.power-confirm-btn.cancel {
+  background: t.$bg-item;
+  border:     1px solid t.$border;
+  color:      t.$text-secondary;
+}
+.power-confirm-btn.cancel:hover { background: t.$bg-active; color: t.$text-primary; }
+.power-confirm-btn.confirm {
+  background: color.adjust(t.$red, $alpha: -0.82);
+  border:     1px solid color.adjust(t.$red, $alpha: -0.55);
+  color:      t.$red;
+}
+.power-confirm-btn.confirm:hover { background: color.adjust(t.$red, $alpha: -0.70); }
+.power-confirm-btn:focus { box-shadow: inset 0 0 0 1px t.$border-bright; }
+.power-confirm-btn.cancel:active { background: t.$bg-active; }
+.power-confirm-btn.confirm:active { background: color.adjust(t.$red, $alpha: -0.65); }
+.power-confirm-btn:disabled { color: t.$text-dim; opacity: 0.55; }
+
+.bar-left  { padding-left:  9px; }
+.bar-right { padding-right: 9px; }
+.divider-v {
+  background:    t.$border;
+  min-width:     1px;
+  min-height:    18px;
+  margin:        10px 0;
+}

@@ -1,0 +1,113 @@
+@use "tokens" as t;
+
+/* Bar popups */
+.workspaces {
+  margin: 5px 0;
+}
+.ws-dot {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius-full;
+  min-width:     20px;
+  min-height:    20px;
+  padding:       0 2px;
+  box-shadow:    none;
+  transition:    all 0.1s ease, box-shadow 0.3s ease-out;
+}
+.ws-dot label {
+  font-size: 24px;
+  color:     t.$text-dim;
+}
+.ws-dot:hover label { color: t.$text-secondary; }
+.ws-dot.active label { color: t.$accent; }
+.ws-dot:focus { box-shadow: none; outline: none; }
+.ws-dot:active { box-shadow: none; }
+.ws-dot-extra {
+  min-width:  20px;
+  min-height: 20px;
+  padding:    0 2px;
+}
+.ws-dot-extra .ws-extra-num {
+  font-size: 14px;
+  color:     t.$text-dim;
+}
+.ws-dot-extra:hover .ws-extra-num { color: t.$text-secondary; }
+.ws-dot-extra.active .ws-extra-num { color: t.$accent; }
+
+.sysmon-btn {
+  padding: 2px 8px;
+}
+.sysmon-val {
+  font-size:  12px;
+  color:      t.$text-secondary;
+  min-width:  26px;
+}
+
+window.CalendarPopup {
+  background: transparent;
+}
+.cal-popup-box {
+  @include t.glass-panel;
+}
+
+.notif-dnd-label {
+  font-size: 16px;
+  color:     t.$text-primary;
+}
+
+window.BarFlyoutWindow {
+  background: transparent;
+}
+.bar-flyout-root {
+  @include t.glass-panel;
+  border-radius: t.$radius-panel t.$radius-panel 0 0;
+  min-width: 430px;
+  padding:   0;
+}
+.bar-flyout-root separator {
+  min-width:  1px;
+  min-height: 1px;
+  background: t.$border;
+  border:     none;
+}
+.bar-flyout-header {
+  min-height: 22px;
+  padding:    0 12px;
+  background: t.$bg-glass-strong;
+}
+.bar-flyout-title {
+  color:       t.$accent;
+  font-size:   14px;
+  font-weight: 700;
+}
+.bar-flyout-body { padding: 16px; }
+.system-meter-section {
+  min-width: 190px;
+  padding:   0 16px;
+}
+.bar-flyout-sub-title {
+  color:          t.$text-secondary;
+  font-size:      11px;
+  font-weight:    700;
+  letter-spacing: 0.05em;
+}
+.gauge-caption {
+  color:         t.$text-dim;
+  font-size:     10px;
+  font-feature-settings: "tnum";
+}
+.gauge-legend {
+  min-width: 168px;
+  margin-top: 2px;
+}
+.gauge-legend-row { min-height: 17px; }
+.gauge-legend-dot {
+  font-size: 8px;
+}
+.gauge-legend-name,
+.gauge-legend-value {
+  font-size: 11px;
+  font-feature-settings: "tnum";
+}
+.gauge-legend-name { color: t.$text-secondary; }
+.gauge-legend-value { color: t.$text-dim; }

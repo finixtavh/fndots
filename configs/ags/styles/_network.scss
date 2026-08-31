@@ -1,0 +1,224 @@
+@use "sass:color";
+@use "tokens" as t;
+
+/* Network */
+window.WifiMenuWindow { background: transparent; }
+
+.wifi-menu-root {
+  @include t.glass-panel;
+  background: t.$bg-network;
+  border-radius: 0;
+  min-width: 340px;
+}
+.wifi-menu-root.network-flyout-managed { min-width: 0; }
+
+.wifi-menu-header {
+  min-height: 44px;
+  padding: 0 6px 0 10px;
+}
+.wifi-menu-root .wifi-menu-header {
+  background: t.$bg-glass;
+  border-radius: 0;
+}
+
+.wifi-menu-title {
+  font-size:   13px;
+  font-weight: 600;
+  color:       t.$accent;
+}
+
+.wifi-bw-row {
+  padding: 6px 10px;
+}
+.wifi-bw-val {
+  font-size:   11px;
+  font-weight: 400;
+  color:       t.$text-secondary;
+  font-family: "JetBrainsMono Nerd Font", monospace;
+}
+
+.wifi-icon-btn {
+  min-width: 32px;
+  min-height: 26px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: t.$radius-lg;
+  color: t.$text-secondary;
+  box-shadow: none;
+}
+.wifi-icon-btn:hover {
+  background: t.$bg-item-hover;
+  color: t.$text-primary;
+}
+.wifi-icon-btn:focus { box-shadow: inset 0 0 0 1px t.$border-bright; }
+.wifi-icon-btn:active { background: t.$bg-active; }
+.wifi-icon-btn:disabled { color: t.$text-dim; opacity: 0.55; }
+
+listbox.wifi-ap-list {
+  background: transparent;
+  border:     none;
+}
+listbox.wifi-ap-list > row {
+  margin:        1px 6px;
+  padding:       0;
+  background:    transparent;
+  border:        0;
+  border-radius: t.$radius-lg;
+}
+listbox.wifi-ap-list > row:hover {
+  background: t.$bg-item-hover;
+}
+listbox.wifi-ap-list > row:focus {
+  background: t.$bg-item-hover;
+  box-shadow: inset 0 0 0 1px t.$border-bright;
+}
+listbox.wifi-ap-list > row:active { background: t.$bg-active; }
+listbox.wifi-ap-list > row:selected { background: transparent; }
+
+.wifi-ap-active .wifi-ap-name {
+  color:       t.$accent;
+  font-weight: 600;
+}
+
+.wifi-ap-row {
+  min-height: 40px;
+  padding:    2px 6px;
+}
+.wifi-ap-name {
+  color:       t.$text-primary;
+  font-size:   13px;
+  font-weight: 700;
+}
+.wifi-ap-status {
+  color:     t.$text-muted;
+  font-size: 10px;
+}
+.wifi-lock-icon {
+  color:     t.$text-muted;
+  font-size: 14px;
+}
+.wifi-empty-label {
+  padding:   8px;
+  color:     t.$text-muted;
+  font-size: 12px;
+}
+
+.wifi-detail-panel {
+  margin:     0 6px;
+  padding:    6px 8px 8px;
+  background: t.$overlay-3;
+  border-top: 1px solid t.$border;
+}
+.wifi-info-key {
+  min-width:   52px;
+  color:       t.$text-secondary;
+  font-size:   11px;
+  font-weight: 600;
+}
+.wifi-info-val {
+  color:       t.$text-primary;
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size:   11px;
+}
+
+.wifi-connect-btn,
+.wifi-action-btn,
+.wifi-disconnect-btn {
+  min-height:    40px;
+  margin-top:    4px;
+  padding:       0 10px;
+  background:    t.$bg-item;
+  border:        1px solid t.$border;
+  border-radius: t.$radius-lg;
+  color:         t.$text-secondary;
+  font-size:     12px;
+  font-weight:   700;
+  box-shadow:    none;
+}
+.wifi-connect-btn {
+  background:   t.$bg-active;
+  border-color: t.$border-bright;
+  color:        t.$text-primary;
+}
+.wifi-connect-btn:hover,
+.wifi-action-btn:hover {
+  background:   t.$bg-item-hover;
+  border-color: t.$border-bright;
+  color:        t.$text-primary;
+}
+.wifi-connect-btn:active,
+.wifi-action-btn:active {
+  background: t.$bg-active;
+}
+.wifi-disconnect-btn {
+  background:   color.adjust(t.$red, $alpha: -0.90);
+  border-color: t.$red;
+  color:        t.$red;
+}
+.wifi-disconnect-btn:hover {
+  background: color.adjust(t.$red, $alpha: -0.70);
+}
+.wifi-connect-btn:focus,
+.wifi-action-btn:focus,
+.wifi-disconnect-btn:focus {
+  box-shadow: inset 0 0 0 1px t.$border-bright;
+}
+.wifi-connect-btn:disabled,
+.wifi-action-btn:disabled,
+.wifi-disconnect-btn:disabled {
+  color:   t.$text-dim;
+  opacity: 0.55;
+}
+
+.wifi-hidden-group {
+  background:    t.$bg-glass;
+  border-top:    1px solid t.$border;
+}
+.wifi-hidden-group .wifi-detail-panel {
+  background:    t.$bg-glass;
+  margin:        0;
+  border-top:    0;
+}
+.wifi-hidden-toggle {
+  min-height:    40px;
+  padding:       0 10px;
+  background:    t.$bg-glass;
+  border:        0;
+  border-radius: 0;
+  color:         t.$text-secondary;
+  font-size:     12px;
+  box-shadow:    none;
+}
+.wifi-hidden-toggle:hover {
+  background: t.$bg-glass;
+  color:      t.$text-primary;
+}
+.wifi-hidden-toggle:focus {
+  box-shadow: inset 0 0 0 1px t.$border-bright;
+}
+.wifi-hidden-toggle:active { background: t.$bg-glass; }
+.wifi-hidden-toggle:disabled {
+  color:   t.$text-dim;
+  opacity: 0.55;
+}
+
+.wifi-detail-panel entry {
+  min-height:    40px;
+  padding:       0 8px;
+  background:    t.$bg-item;
+  border:        1px solid t.$border;
+  border-radius: t.$radius-lg;
+  color:         t.$text-primary;
+  caret-color:   t.$accent;
+  font-size:     12px;
+  box-shadow:    none;
+}
+.wifi-detail-panel entry:focus {
+  border-color: t.$border-bright;
+  box-shadow:   none;
+}
+.wifi-detail-panel entry:disabled {
+  color:   t.$text-dim;
+  opacity: 0.55;
+}

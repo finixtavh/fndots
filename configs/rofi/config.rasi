@@ -1,0 +1,22 @@
+configuration {
+    modi: "run,drun,window";
+    icon-theme: "Oranchelo";
+    show-icons: true;
+    terminal: "kitty";
+    drun-display-format: "{icon} {name}";
+    location: 0;
+    disable-history: false;
+    hide-scrollbar: true;
+    display-drun: "   Apps ";
+    display-run: "   Run ";
+    display-window: "   Window";
+    display-Network: " 󰤨  Network";
+    sidebar-mode: true;
+
+    /* Don't steal compositor focus → user can click outside rofi.
+       click-to-exit closes rofi when an outside click is detected. */
+    steal-focus: false;
+    click-to-exit: true;
+}
+
+@theme "theme"

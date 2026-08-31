@@ -1,0 +1,117 @@
+{
+  "include": [
+    "env.d.ts",
+    "widget/**/*.tsx",
+    "widget/**/*.ts",
+    "app.ts"
+  ],
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "Astal.createElement",
+    "jsxFragmentFactory": "Astal.Fragment",
+    "lib": [
+      "es2022",
+      "dom"
+    ],
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@girs/*": [
+        "./@girs/*"
+      ],
+      "gnim": [
+        "/usr/share/ags/js/node_modules/gnim/dist/index.ts"
+      ],
+      "gnim/*": [
+        "/usr/share/ags/js/node_modules/gnim/dist/*.ts"
+      ],
+      "ags": [
+        "/usr/share/ags/js/lib/index.ts"
+      ],
+      "ags/gtk3": [
+        "/usr/share/ags/js/lib/gtk3/index.ts"
+      ],
+      "ags/gtk3/app": [
+        "/usr/share/ags/js/lib/gtk3/app.ts"
+      ],
+      "ags/gtk3/jsx-runtime": [
+        "/usr/share/ags/js/lib/gtk3/jsx-runtime.ts"
+      ],
+      "ags/gtk4": [
+        "/usr/share/ags/js/lib/gtk4/index.ts"
+      ],
+      "ags/gtk4/app": [
+        "/usr/share/ags/js/lib/gtk4/app.ts"
+      ],
+      "ags/app": [
+        "/usr/share/ags/js/lib/app/index.ts"
+      ],
+      "ags/file": [
+        "/usr/share/ags/js/lib/file.ts"
+      ],
+      "ags/process": [
+        "/usr/share/ags/js/lib/process.ts"
+      ],
+      "ags/time": [
+        "/usr/share/ags/js/lib/time.ts"
+      ],
+      "gi://GLib": [
+        "./@girs/glib-2.0"
+      ],
+      "gi://GLib?version=2.0": [
+        "./@girs/glib-2.0"
+      ],
+      "gi://Gio": [
+        "./@girs/gio-2.0"
+      ],
+      "gi://Gio?version=2.0": [
+        "./@girs/gio-2.0"
+      ],
+      "gi://GdkPixbuf": [
+        "./@girs/gdkpixbuf-2.0"
+      ],
+      "gi://GdkPixbuf?version=2.0": [
+        "./@girs/gdkpixbuf-2.0"
+      ],
+      "gi://PangoCairo": [
+        "./@girs/pangocairo-1.0"
+      ],
+      "gi://PangoCairo?version=1.0": [
+        "./@girs/pangocairo-1.0"
+      ],
+      "gi://Gtk?version=3.0": [
+        "./@girs/gtk-3.0"
+      ],
+      "gi://Gdk?version=3.0": [
+        "./@girs/gdk-3.0"
+      ],
+      "gi://Astal?version=3.0": [
+        "./@girs/astal-3.0"
+      ],
+      "gi://AstalTray": [
+        "./@girs/astaltray-0.1"
+      ],
+      "gi://AstalHyprland": [
+        "./@girs/astalhyprland-0.1"
+      ],
+      "gi://AstalWp": [
+        "./@girs/astalwp-0.1"
+      ],
+      "gi://AstalBluetooth": [
+        "./@girs/astalbluetooth-0.1"
+      ],
+      "gi://AstalApps": [
+        "./@girs/astalapps-0.1"
+      ],
+      "gi://AstalMpris": [
+        "./@girs/astalmpris-0.1"
+      ],
+      "gi://AstalNotifd": [
+        "./@girs/astalnotifd-0.1"
+      ]
+    },
+    "strict": true,
+    "skipLibCheck": true,
+    "target": "ES2020"
+  }
+}

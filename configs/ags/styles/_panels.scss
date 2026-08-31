@@ -1,0 +1,272 @@
+@use "sass:color";
+@use "tokens" as t;
+
+/* Panels */
+window.KeybindsViewer {
+  background: transparent;
+}
+
+.kb-root {
+  @include t.glass-panel;
+  padding:  24px 28px;
+  min-width: 320px;
+}
+
+entry.kb-search {
+  background:    t.$bg-item;
+  color:         t.$text-primary;
+  border:        1px solid t.$border;
+  border-radius: t.$radius-xl;
+  padding:       6px 10px;
+  caret-color:   t.$accent;
+}
+entry.kb-search:focus {
+  border-color: t.$border-bright;
+  box-shadow:   none;
+  outline:      none;
+}
+
+.kb-section-title {
+  font-size:      14px;
+  font-weight:    700;
+  letter-spacing: 2px;
+  color:          t.$accent;
+  margin-top:     4px;
+  margin-bottom:  2px;
+}
+
+.kb-common-grid {
+  margin-bottom: 4px;
+}
+
+.kb-group-title {
+  font-size:      13px;
+  font-weight:    700;
+  letter-spacing: 1.5px;
+  color:          t.$text-dim;
+  margin-top:     6px;
+}
+
+.kb-key {
+  font-family:  "JetBrainsMono Nerd Font", monospace;
+  font-size:    15px;
+  font-weight:  600;
+  color:        t.$accent;
+}
+
+.kb-action {
+  font-size:  16px;
+  color:      t.$text-secondary;
+}
+
+listbox.kb-list {
+  background: transparent;
+  border:     none;
+}
+listbox.kb-list row.kb-row {
+  background:    transparent;
+  border-radius: t.$radius-lg;
+  padding:       0;
+}
+listbox.kb-list row.kb-row:hover {
+  background: t.$bg-item-hover;
+}
+
+.kb-hint {
+  font-size:  14px;
+  color:      t.$text-dim;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+window.CommandCenter {
+  background: transparent;
+}
+
+.cmd-root {
+  @include t.glass-panel;
+  min-width:     500px;
+  padding:       0;
+  border-radius: t.$radius-panel;
+}
+.cmd-root separator {
+  min-width:  1px;
+  min-height: 1px;
+  background: t.$border;
+  border:     none;
+}
+.cmd-header {
+  min-height:    42px;
+  padding:       0 12px;
+  background:    t.$bg-glass-strong;
+  border-radius: t.$radius-panel t.$radius-panel 0 0;
+}
+.cmd-title {
+  color:       t.$accent;
+  font-size:   14px;
+  font-weight: 700;
+}
+.cmd-body { padding: 16px; }
+
+.cmd-btn {
+  background:    t.$bg-item;
+  border:        1px solid t.$border;
+  border-radius: t.$radius-lg;
+  padding:       8px;
+  min-width:     100px;
+  min-height:    44px;
+  color:         t.$text-secondary;
+  transition:    background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out;
+}
+.cmd-btn:hover {
+  background:   t.$bg-active;
+  border-color: t.$border-bright;
+  color:        t.$text-primary;
+}
+.cmd-btn:focus {
+  box-shadow: inset 0 0 0 1px t.$accent;
+  outline:    none;
+}
+.cmd-btn:active { background: t.$bg-item-hover; }
+.cmd-btn:disabled { opacity: 0.55; }
+
+.cmd-btn-label {
+  color:       t.$text-secondary;
+  font-size:   11px;
+  font-weight: 700;
+}
+.cmd-btn:hover .cmd-btn-label { color: t.$text-primary; }
+
+.cmd-hint {
+  color:     t.$text-dim;
+  font-size: 10px;
+}
+
+.cmd-btn-power {
+  border-color: color.adjust(t.$red, $alpha: -0.65);
+}
+.cmd-btn-power:hover {
+  background:   color.adjust(t.$red, $alpha: -0.88);
+  border-color: color.adjust(t.$red, $alpha: -0.30);
+}
+.cmd-toggle-row {
+  min-height:    44px;
+  padding:       0 12px;
+  background:    t.$bg-item;
+  border:        1px solid t.$border;
+  border-radius: t.$radius-lg;
+  color:         t.$text-secondary;
+  transition:    background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out;
+}
+.cmd-toggle-row:hover {
+  background:   t.$bg-item-hover;
+  border-color: t.$border-bright;
+  color:        t.$text-primary;
+}
+.cmd-toggle-row:focus {
+  box-shadow: inset 0 0 0 1px t.$accent;
+  outline:    none;
+}
+.cmd-toggle-row:active { background: t.$bg-active; }
+.cmd-toggle-row:disabled { opacity: 0.55; }
+.cmd-toggle-row label { color: t.$text-secondary; font-size: 12px; font-weight: 700; }
+.cmd-toggle-row label:last-child { color: t.$text-dim; font-size: 11px; }
+
+window.NotifCenter {
+  background: transparent;
+}
+.notif-panel {
+  @include t.glass-panel;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  min-width:  420px;
+  min-height: 750px;
+}
+.notif-panel-title {
+  font-size:   15px;
+  font-weight: 600;
+  color:       t.$accent;
+}
+.notif-clear-btn {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius-xl;
+  padding:       3px 9px;
+  font-size:     11px;
+  color:         t.$text-secondary;
+  transition:    150ms ease, box-shadow 0.3s ease-out;
+}
+.notif-clear-btn:hover {
+  background:   t.$bg-item-hover;
+  border-color: t.$border-bright;
+  color:        t.$text-primary;
+}
+.notif-item {
+  background:    t.$bg-item;
+  border:        none;
+  border-radius: t.$radius-2xl;
+  padding:       10px;
+  transition:    150ms ease, box-shadow 0.3s ease-out;
+}
+.notif-item:hover {
+  background: t.$bg-item-hover;
+}
+.notif-item.urgency-2 {
+  border-color: color.adjust(t.$red, $alpha: -0.60);
+}
+window.NotifPopup {
+  background: transparent;
+}
+.notif-item.notif-toast {
+  background:    rgba(10, 10, 10, 0.96);
+  border-color:  t.$border-bright;
+  min-width:     320px;
+}
+.notif-icon-box {
+  min-width:     30px;
+  min-height:    30px;
+  background:    t.$bg-item;
+  border-radius: t.$radius-xl;
+}
+.notif-app {
+  font-size:   11px;
+  font-weight: 600;
+  color:       t.$accent;
+}
+.notif-time {
+  font-size: 10.5px;
+  color:     t.$text-dim;
+}
+.notif-summary {
+  font-size:   12.5px;
+  font-weight: 600;
+  color:       t.$text-primary;
+}
+.notif-body {
+  font-size:  11.5px;
+  color:      t.$text-secondary;
+}
+.notif-dismiss {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius-full;
+  min-width:     22px;
+  min-height:    22px;
+  padding:       0;
+  color:         t.$text-dim;
+  font-size:     17px;
+}
+.notif-dismiss:hover {
+  background: color.adjust(t.$red, $alpha: -0.80);
+  color:      t.$red;
+}
+.notif-empty {
+  font-size:  16px;
+  color:      t.$text-dim;
+  font-style: italic;
+  padding:    12px 0;
+}
+
+.notif-panel switch:checked {
+  background: t.$accent;
+}

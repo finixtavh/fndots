@@ -1,0 +1,279 @@
+#autoload
+# Loaded on first use via ~/.zshrc: autoload -Uz fnctl
+emulate -L zsh
+
+local config_home="${XDG_CONFIG_HOME:-}"
+local cache_home="${XDG_CACHE_HOME:-}"
+[[ "$config_home" == /* ]] || config_home="$HOME/.config"
+[[ "$cache_home" == /* ]] || cache_home="$HOME/.cache"
+
+_fnctl_help() {
+  cat <<'EOF'
+fnctl — Finixtavh dotfiles control utility
+
+Usage:
+  fnctl <command> [arguments]
+  fnctl -h | --help
+
+Commands:
+  f                    Open fnnetspeed
+  d                    Launch Ditto
+  fnsession <args...>  Pass arguments to fnsession
+  config <command>     Manage AGS and dotfiles settings
+  loadlyr <file>       Save an LRC lyric file for the current song
+
+Config commands:
+  lowenddevices        Toggle AGS low-end-device mode
+  lowendbenchmark      Run the AGS low-end benchmark
+  clearcache           Clear regenerable AGS cache data
+  musicbar             Toggle the MusicBar now-playing panel
+  ags                  Restart AGS through the FN-Logs-aware launcher
+
+Help:
+  fnctl config -h      Show config command help
+  fnctl loadlyr -h     Show loadlyr help
+
+Examples:
+  fnctl f
+  fnctl config musicbar
+  fnctl loadlyr ~/Downloads/song.lrc
+EOF
+}
+
+_fnctl_config_help() {
+  cat <<'EOF'
+Usage: fnctl config <command>
+
+Commands:
+  lowenddevices        Toggle AGS low-end-device mode
+  lowendbenchmark      Run the AGS low-end benchmark
+  clearcache           Clear regenerable AGS cache data
+  musicbar             Toggle the MusicBar now-playing panel
+  ags                  Restart AGS through the FN-Logs-aware launcher
+EOF
+}
+
+_fnctl_loadlyr_help() {
+  cat <<'EOF'
+Usage: fnctl loadlyr <path-to-lyric-file>
+
+Creates ~/lyrics/<current-title>.lyr using the current player title/artist and
+the timestamped LRC content from the supplied file.
+EOF
+}
+
+_fnctl_unexpected_args() {
+  local command_name="$1"
+  shift
+  local help_command="$command_name"
+  [[ "$command_name" == config\ * ]] && help_command='config'
+  print -u2 -- "fnctl: unexpected argument(s) for '${command_name}': $*"
+  print -u2 -- "Try 'fnctl ${help_command} -h' for valid usage."
+  return 2
+}
+
+  local cmd="${1:-}"
+  case "$cmd" in
+    ''|-h|--help|help)
+      _fnctl_help
+      ;;
+    f)
+      if (( $# > 1 )); then
+        if [[ "$2" == '-h' || "$2" == '--help' ]]; then
+          print 'Usage: fnctl f'
+          print 'Opens the fnnetspeed panel.'
+          return 0
+        fi
+        _fnctl_unexpected_args 'f' "${@:2}"
+        return $?
+      fi
+      local fnnetspeed_bin="$HOME/.local/bin/fnnetspeed"
+      if [[ -x "$fnnetspeed_bin" ]]; then
+        "$fnnetspeed_bin"
+      elif command -v fnnetspeed &>/dev/null; then
+        command fnnetspeed
+      else
+        print -u2 -- 'fnnetspeed is not installed. Run install.sh or update.sh --all from the dotfiles checkout.'
+        return 1
+      fi
+      ;;
+    fnsession)
+      if ! command -v fnsession &>/dev/null; then
+        print -u2 -- 'fnsession is not installed.'
+        return 1
+      fi
+      shift
+      command fnsession "$@"
+      ;;
+    d)
+      if (( $# > 1 )); then
+        if [[ "$2" == '-h' || "$2" == '--help' ]]; then
+          print 'Usage: fnctl d'
+          print 'Launches Ditto.'
+          return 0
+        fi
+        _fnctl_unexpected_args 'd' "${@:2}"
+        return $?
+      fi
+      local ditto_bin="$HOME/fn-apps/ditto/ditto"
+      if [[ -x "$ditto_bin" ]]; then
+        "$ditto_bin"
+      elif command -v ditto &>/dev/null; then
+        ditto
+      else
+        echo "ditto not found — build it first (see install.sh)"
+      fi
+      ;;
+    config)
+      local sub="${2:-}"
+      case "$sub" in
+        ''|-h|--help|help)
+          _fnctl_config_help
+          ;;
+        lowenddevices)
+          if (( $# > 2 )); then _fnctl_unexpected_args 'config lowenddevices' "${@:3}"; return $?; fi
+          python3 - "$config_home/ags/user-settings.json" <<'PY'
+import json, os, pathlib, sys, tempfile
+
+path = pathlib.Path(sys.argv[1])
+try:
+    with path.open(encoding='utf-8') as handle:
+        settings = json.load(handle)
+except FileNotFoundError:
+    settings = {}
+except (OSError, json.JSONDecodeError) as error:
+    raise SystemExit(f'fnctl: refusing to overwrite invalid settings: {error}')
+if not isinstance(settings, dict):
+    raise SystemExit('fnctl: refusing to overwrite settings because the JSON root is not an object')
+
+value = not settings.get('lowEndDevice', False)
+settings['lowEndDevice'] = value
+path.parent.mkdir(parents=True, exist_ok=True)
+fd, temporary_name = tempfile.mkstemp(prefix=f'.{path.name}.', dir=path.parent, text=True)
+try:
+    with os.fdopen(fd, 'w', encoding='utf-8') as handle:
+        json.dump(settings, handle, indent=2)
+        handle.write('\n')
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary_name, path)
+finally:
+    try:
+        os.unlink(temporary_name)
+    except FileNotFoundError:
+        pass
+print('lowEndDevice:', 'enabled' if value else 'disabled')
+PY
+          ;;
+        lowendbenchmark)
+          if (( $# > 2 )); then _fnctl_unexpected_args 'config lowendbenchmark' "${@:3}"; return $?; fi
+          bash "$config_home/ags/scripts/lowend-benchmark.sh"
+          ;;
+        clearcache)
+          if (( $# > 2 )); then _fnctl_unexpected_args 'config clearcache' "${@:3}"; return $?; fi
+          local cache="$cache_home/ags"
+          if [[ -d "$cache" ]]; then
+            local -a cache_targets
+            cache_targets=(
+              "$cache/art"
+              "$cache/wall-thumbs"
+              "$cache/cliphist-thumbs"
+              "$cache/ytdlp-categories.json"
+              "$cache/lrclib-misses.json"
+            )
+            rm -rf -- "${cache_targets[@]}"
+            echo "Regenerable cache cleared (history and logs preserved)"
+          else
+            echo "No cache directory found"
+          fi
+          ;;
+        musicbar)
+          if (( $# > 2 )); then _fnctl_unexpected_args 'config musicbar' "${@:3}"; return $?; fi
+          ags request -i ags-bar toggle-nowplaying 2>/dev/null && echo "MusicBar toggled" || echo "Failed to toggle MusicBar"
+          ;;
+        ags)
+          if (( $# > 2 )); then _fnctl_unexpected_args 'config ags' "${@:3}"; return $?; fi
+          ags quit -i ags-bar 2>/dev/null || true
+          sleep 0.3
+          nohup "$config_home/ags/scripts/launch-ags.sh" >/dev/null 2>&1 &
+          disown; echo "AGS restarted"
+          ;;
+        *)
+          print -u2 -- "fnctl: unknown config command: '$sub'"
+          print -u2 -- "Valid config commands: lowenddevices, lowendbenchmark, clearcache, musicbar, ags"
+          print -u2 -- "Try 'fnctl config -h' for details."
+          return 2
+          ;;
+      esac
+      ;;
+    loadlyr)
+      local file="${2:-}"
+      if [[ "$file" == '-h' || "$file" == '--help' ]]; then
+        _fnctl_loadlyr_help
+        return 0
+      fi
+      if (( $# > 2 )); then
+        _fnctl_unexpected_args 'loadlyr' "${@:3}"
+        return $?
+      fi
+      if [[ -z "$file" ]]; then
+        print -u2 -- "fnctl: loadlyr requires a lyric file path."
+        print -u2 -- "Usage: fnctl loadlyr <path-to-lyric-file>"
+        return 2
+      fi
+      if [[ "$file" == -* ]]; then
+        print -u2 -- "fnctl: unknown loadlyr option: '$file'"
+        print -u2 -- "Try 'fnctl loadlyr -h' for valid usage."
+        return 2
+      fi
+      if [[ ! -f "$file" ]]; then
+        print -u2 -- "fnctl: lyric file not found: '$file'"
+        print -u2 -- "Check the path, then try again."
+        return 1
+      fi
+      local title artist
+      title=$(playerctl metadata xesam:title 2>/dev/null)
+      artist=$(playerctl metadata xesam:artist 2>/dev/null)
+      if [[ -z "$title" ]]; then
+        echo "No song playing"
+        return 1
+      fi
+      mkdir -p "$HOME/lyrics"
+      local safe_title="${title//\//_}"
+      safe_title="${safe_title//\\/_}"
+      safe_title="${safe_title//$'\n'/_}"
+      safe_title="${safe_title//$'\r'/_}"
+      [[ -n "$safe_title" && "$safe_title" != '.' && "$safe_title" != '..' ]] || safe_title='untitled'
+      local outfile="$HOME/lyrics/${safe_title}.lyr"
+      local staged
+      staged="$(mktemp "$HOME/lyrics/.${safe_title}.XXXXXX")" || {
+        print -u2 -- 'fnctl: could not create a temporary lyric file.'
+        return 1
+      }
+      {
+        printf 'name:"%s"\n\n' "$title"
+        printf 'author:"%s"\n\n' "$artist"
+        cat "$file"
+      } > "$staged" || {
+        rm -f -- "$staged"
+        print -u2 -- 'fnctl: could not write the lyric file.'
+        return 1
+      }
+      mv -f -- "$staged" "$outfile" || {
+        rm -f -- "$staged"
+        print -u2 -- 'fnctl: could not activate the lyric file.'
+        return 1
+      }
+      echo "Saved: $outfile"
+      ;;
+    *)
+      if [[ "$cmd" == -* ]]; then
+        print -u2 -- "fnctl: unknown option: '$cmd'"
+      else
+        print -u2 -- "fnctl: unknown command: '$cmd'"
+      fi
+      print -u2 -- "Valid commands: f, d, fnsession, config, loadlyr"
+      print -u2 -- "Try 'fnctl -h' for details."
+      return 2
+      ;;
+  esac

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -u
+
+appimage="${1-}"
+
+notify_error() {
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send "AppImage" "$1" --urgency=critical
+  fi
+}
+
+if [[ -z "${appimage}" ]] || [[ ! -f "${appimage}" ]]; then
+  notify_error "The selected AppImage does not exist."
+  exit 1
+fi
+
+if [[ "${appimage,,}" != *.appimage ]]; then
+  notify_error "The selected file is not an AppImage."
+  exit 1
+fi
+
+if ! chmod u+x -- "${appimage}"; then
+  notify_error "Could not make the AppImage executable."
+  exit 1
+fi
+
+appimage_dir="${appimage%/*}"
+if [[ "${appimage_dir}" == "${appimage}" ]]; then
+  appimage_dir="."
+fi
+cd -- "${appimage_dir}" || exit 1
+
+exec -- "${appimage}"

@@ -1,0 +1,26 @@
+@use "tokens" as t;
+
+/* OSD */
+window.OSD {
+  background: transparent;
+}
+.osd-card-event {
+  background: transparent;
+}
+.osd-card-icon {
+  font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+  font-size:   22px;
+  font-weight: 500;
+  color:       t.$accent;
+  background:  transparent;
+}
+.osd-card-app-icon {
+  background: transparent;
+}
+.osd-card-value {
+  font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+  font-size:   13px;
+  font-weight: 700;
+  color:       t.$text-primary;
+  background:  transparent;
+}

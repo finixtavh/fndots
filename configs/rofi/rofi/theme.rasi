@@ -1,0 +1,137 @@
+/**
+ * ROFI theme - dark sage green palette
+ */
+
+* {
+    bg:          #050505;
+    bg-surface:  #121212;
+    bg-item:     rgba(42, 42, 42, 0.90);
+    bg-selected: #33473D;
+    border-col:  #2A2A2A;
+    accent:      #89B19E;
+    fg:          #E8E8E8;
+    fg2:         #C8C8C8;
+    muted:       #7A7A7A;
+
+    font:             "JetBrainsMono Nerd Font 12";
+    background-color: transparent;
+    text-color:       @fg;
+}
+
+element-text, element-icon, mode-switcher {
+    background-color: inherit;
+    text-color:       inherit;
+}
+
+window {
+    width:            600px;
+    height:           400px;
+    background-color: @bg-surface;
+    border:           1px;
+    border-color:     @border-col;
+    border-radius:    14px;
+}
+
+mainbox {
+    background-color: transparent;
+    padding:          12px;
+    spacing:          10px;
+}
+
+inputbar {
+    background-color: @bg;
+    border:           1px;
+    border-color:     @border-col;
+    border-radius:    8px;
+    padding:          2px;
+    children:         [prompt, entry];
+}
+
+prompt {
+    background-color: @bg-selected;
+    border-radius:    8px 0 0 8px;
+    padding:          6px 10px;
+    text-color:       @accent;
+    margin:           0;
+}
+
+textbox-prompt-colon {
+    expand: false;
+    str:    ":";
+}
+
+entry {
+    background-color: transparent;
+    padding:          6px 10px;
+    text-color:       @fg;
+    margin:           0;
+}
+
+listview {
+    background-color: transparent;
+    border:           0;
+    padding:          4px 0 0;
+    spacing:          2px;
+    columns:          2;
+    lines:            5;
+}
+
+element {
+    background-color: transparent;
+    border-radius:    6px;
+    padding:          6px 10px;
+    text-color:       @fg2;
+    spacing:          8px;
+}
+
+element-icon {
+    size: 22px;
+}
+
+element-text {
+    vertical-align: 0.5;
+}
+
+element selected {
+    background-color: @bg-selected;
+    text-color:       @accent;
+    border:           1px;
+    border-color:     @accent;
+    border-radius:    6px;
+}
+
+mode-switcher {
+    background-color: @bg;
+    border:           1px;
+    border-color:     @border-col;
+    border-radius:    8px;
+    spacing:          0;
+    margin:           4px 0 0 0;
+}
+
+button {
+    background-color: transparent;
+    text-color:       @muted;
+    padding:          8px;
+    vertical-align:   0.5;
+    horizontal-align: 0.5;
+}
+
+button selected {
+    background-color: @bg-selected;
+    text-color:       @accent;
+    border-radius:    8px;
+}
+
+message {
+    background-color: @bg-item;
+    border-radius:    6px;
+    padding:          6px;
+    margin:           2px 0;
+}
+
+textbox {
+    text-color:       @accent;
+    background-color: transparent;
+    padding:          4px 8px;
+}

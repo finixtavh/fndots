@@ -1,0 +1,291 @@
+@use "tokens" as t;
+
+/* Bar */
+.music-3pill-root {
+  background: transparent;
+  border:     none;
+  padding:    0px 8px;
+}
+
+.m-left-pill,
+.m-center-pill,
+.m-right-pill {
+  background:    t.$bg-glass;
+  border:        1px solid t.$border;
+  border-top:    none;
+  padding:       5px 10px;
+  min-height:    36px;
+}
+
+.m-left-pill,
+.m-right-pill {
+  padding-top: 10px;
+}
+
+.m-left-pill {
+  margin-left:   0;
+  background:    transparent;
+  border:        none;
+  border-radius: 0;
+  padding-left:  30px;
+  padding-right: 30px;
+}
+.m-right-pill {
+  margin-right:  0;
+  background:    transparent;
+  border:        none;
+  border-radius: 0;
+  padding-left:  30px;
+  padding-right: 30px;
+}
+.m-center-pill {
+  padding:       5px 16px;
+  border-top:    1px solid t.$border;
+  border-radius: 10px;
+}
+.main-bar-root {
+  border-radius: 0 0 14px 14px;
+  margin:        0 7px 5px 7px;
+  border:        1px solid t.$border;
+}
+
+.launcher {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius-sm t.$radius-sm 0 0;
+  box-shadow:    inset 0 -2px 0 transparent;
+  padding:       2px 8px;
+  margin:        5px 0;
+  min-height:    24px;
+  min-width:     28px;
+  transition:    background 140ms ease, box-shadow 140ms ease;
+}
+.launcher:hover {
+  background: t.$bg-item-hover;
+}
+.launcher:active {
+  background: transparent;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+.launcher:hover:active {
+  background: t.$bg-item-hover;
+}
+.color-picker {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius;
+  padding:       2px 7.5px;
+  margin:        5px 0;
+  min-height:    20px;
+  transition:    background 0.2s ease;
+}
+.color-picker:hover {
+  background:   t.$bg-item-hover;
+}
+
+.clock {
+  background:    t.$bg-item;
+  border:        1px solid t.$border;
+  border-radius: t.$radius;
+  padding:       2px 7.5px;
+  margin:        5px 0;
+  min-height:    24px;
+}
+.clock-time {
+  font-weight:    600;
+  font-size:      12px;
+  letter-spacing: 0.5px;
+}
+
+.calendar-btn {
+  background:    t.$bg-item;
+  border:        1px solid t.$border;
+  border-radius: t.$radius;
+  padding:       2px 11.5px;
+  margin:        5px 0;
+  min-height:    24px;
+  transition:    200ms ease, box-shadow 0.3s ease-out;
+}
+.calendar-btn:hover {
+  background:   t.$bg-item-hover;
+  border-color: t.$border-bright;
+}
+.calendar-date {
+  font-weight: 500;
+  font-size:   12px;
+}
+
+.taskbar {
+  margin: 5px 0;
+}
+.task-btn {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius;
+  padding:       2px 8px;
+  min-height:    24px;
+  transition:    background 0.15s ease, border-color 0.15s ease;
+}
+.task-btn label {
+  color: t.$text-secondary;
+}
+.task-btn:hover {
+  background:   t.$bg-item-hover;
+}
+.task-btn:hover label {
+  color: t.$text-primary;
+}
+.task-btn:active {
+  background: t.$bg-active;
+}
+
+.task-btn.active {
+  background:   t.$bg-active;
+}
+.task-btn.active label {
+  color:       t.$text-primary;
+  font-weight: 600;
+}
+
+.taskbar-more {
+  background: transparent;
+  border:     none;
+  padding:    2px 7px;
+  min-width:  24px;
+  min-height: 24px;
+}
+.taskbar-more label {
+  font-size:   11px;
+  font-weight: 700;
+  color:       t.$text-secondary;
+}
+.taskbar-more:hover {
+  background: t.$bg-item-hover;
+}
+.taskbar-more:hover label {
+  color: t.$text-primary;
+}
+
+window.TaskbarMenuWindow {
+  background: transparent;
+}
+.taskbar-menu-box {
+  @include t.glass-panel;
+  border-radius: t.$radius;
+  padding:       6px;
+}
+.taskbar-menu-row {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius;
+  padding:       5px 9px;
+  min-height:    26px;
+}
+.taskbar-menu-row:hover {
+  background: t.$bg-item-hover;
+}
+.taskbar-menu-label {
+  font-size: 12px;
+  color:     t.$text-primary;
+}
+
+.tray {
+  margin: 5px 0;
+}
+.tray-item {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius-lg;
+  padding:       2px;
+  min-height:    24px;
+  min-width:     24px;
+}
+.tray-item:hover {
+  background: t.$bg-item-hover;
+}
+
+.album-art-box {
+  border-radius: t.$radius-lg;
+  min-width:     28px;
+  min-height:    28px;
+  background:    t.$bg-item;
+  margin:        5px 0;
+  border:        1px solid t.$border;
+}
+
+.media-info {
+  margin: 2px 0;
+}
+.song-title {
+  font-weight: 600;
+  font-size:   12px;
+  color:       t.$text-primary;
+}
+.song-artist {
+  font-size: 10px;
+  color:     t.$text-secondary;
+}
+
+.media-controls {
+  margin: 5px 0;
+}
+.ctrl-btn {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius-lg;
+  padding:       2px 4px;
+  color:         t.$text-secondary;
+  font-size:     14px;
+  min-height:    24px;
+  min-width:     24px;
+}
+
+.ctrl-btn-next {
+  @extend .ctrl-btn;
+  border-bottom-right-radius: 40px;
+}
+
+.ctrl-btn:hover {
+  background: t.$bg-item-hover;
+  color:      t.$accent;
+}
+.ctrl-btn.play {
+  background: t.$bg-item;
+  border:     1px solid transparent;
+}
+.ctrl-btn.play.active {
+  background: t.$bg-active;
+  color:      t.$accent;
+  border:     1px solid t.$border;
+}
+
+button.lyrics-container {
+  background:    t.$bg-glass;
+  border:        none;
+  border-radius: t.$radius-round;
+  padding:       2px 12px;
+  margin:        5px 0;
+  min-width:     256px;
+  transition:    background 150ms ease, box-shadow 0.3s ease-out;
+
+  &:hover {
+    background: t.$bg-item-hover;
+  }
+
+  &:focus {
+    box-shadow: none;
+    outline:    none;
+  }
+}
+.lyric-label {
+  font-weight:   600;
+  font-size:     12px;
+  letter-spacing: 0.2px;
+}
+.lyric-label.active {
+  color: t.$text-primary;
+}
+.lyric-label.no-lyrics {
+  color:      t.$text-dim;
+  font-style: italic;
+}

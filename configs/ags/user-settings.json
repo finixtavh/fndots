@@ -1,0 +1,20 @@
+{
+  "cavaAutoHz": true,
+  "cavaManualHz": 60,
+  "chromaArtworkPalette": true,
+  "historyIntervalS": 30,
+  "batteryChargeLimit80": true,
+  "lowEndDevice": false,
+  "networkFlyoutReorder": true,
+  "debugMode": true,
+  "disableHyprlandOpacityBlur": true,
+  "idleLockEnabled": true,
+  "idleLockMinutes": 30,
+  "hyprsunsetEnabled": false,
+  "hyprsunsetTemperature": 4000,
+  "fnsessionAutostart": true,
+  "terminalStarship": true,
+  "terminalPyenv": true,
+  "terminalCompletions": true,
+  "terminalPlugins": true
+}

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Run AppImage
+Comment=Make an AppImage executable and launch it
+Icon=application-x-executable
+Exec=/bin/sh -c "exec \\"\\$HOME/.local/bin/appimage-run\\" \\"\\$1\\"" appimage-run %f
+TryExec=/bin/sh
+Terminal=false
+NoDisplay=true
+StartupNotify=true
+MimeType=application/vnd.appimage;application/x-iso9660-appimage;

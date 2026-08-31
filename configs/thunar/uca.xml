@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+<action>
+	<icon>utilities-terminal</icon>
+	<name>Open Terminal Here</name>
+	<submenu></submenu>
+	<unique-id>1785264609910223-1</unique-id>
+	<command>exo-open --working-directory %f --launch TerminalEmulator</command>
+	<description>Example for a custom action</description>
+	<range></range>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+</action>
+<action>
+	<icon>archive-extract</icon>
+	<name>Extract Here</name>
+	<submenu></submenu>
+	<unique-id>1785532100000000-2</unique-id>
+	<command>/bin/sh -c 'exec "$HOME/.local/bin/extract-here" "$@"' extract-here %F</command>
+	<description>Extract each selected archive into its own folder</description>
+	<range></range>
+	<patterns>*.7z;*.bz2;*.bzip2;*.cb7;*.cbr;*.cbt;*.cbz;*.gz;*.gzip;*.iso;*.lz;*.lz4;*.lzma;*.rar;*.tar;*.tar.bz2;*.tar.gz;*.tar.lz;*.tar.lz4;*.tar.xz;*.tar.zst;*.tbz;*.tbz2;*.tgz;*.txz;*.xz;*.zip;*.zst;*.7Z;*.RAR;*.TAR;*.ZIP</patterns>
+	<other-files/>
+</action>
+</actions>

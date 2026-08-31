@@ -1,0 +1,185 @@
+@use "tokens" as t;
+
+/* Music */
+popover.background {
+  padding: 0;
+}
+popover > contents {
+  background:    rgba(5, 5, 5, 0.97);
+  border:        1px solid t.$border-bright;
+  border-radius: t.$radius;
+  padding:       0;
+}
+.pop-lyric-filename {
+  font-size:   10px;
+  font-weight: 400;
+  color:       t.$text-dim;
+  font-style:  italic;
+  padding:     2px 2px 4px;
+}
+.pop-lyric-current {
+  font-size:      14px;
+  font-weight:    700;
+  color:          t.$text-primary;
+  padding:        4px 2px;
+}
+.pop-lyric-context {
+  font-size:   11px;
+  font-weight: 400;
+  color:       t.$text-dim;
+  padding:     2px 2px;
+}
+
+.npp-root {
+  background: t.$bg-glass;
+}
+
+.npp-side-panel-left {
+  background: rgba(18, 18, 18, 0.70);
+  border-top-left-radius: 0;
+  padding: 0;
+}
+
+.npp-side-panel-right {
+  background: rgba(18, 18, 18, 0.70);
+  border-top-right-radius: 0;
+  padding: 0;
+}
+
+.npp-top-area {
+  background: transparent;
+}
+.npp-spectrum {
+  background: t.$bg-glass;
+}
+separator.npp-vsep {
+  min-width:  1px;
+  background: t.$overlay-12;
+  margin:     6px 0;
+}
+separator.npp-spec-sep {
+  min-height: 1px;
+  background: t.$overlay-12;
+  margin:     0 12px;
+}
+.npp-art {
+  border-radius: t.$radius-panel;
+  min-width:     220px;
+  margin:        0 5px 0 5px;
+}
+.npp-track-details {
+  background:    rgba(42, 42, 42, 0.50);
+  border:        none;
+  border-radius: 0;
+  margin:        0 0 0 -1px;
+}
+.npp-track-info {
+  padding:       4px 10px;
+}
+.npp-title {
+  font-size:   13px;
+  font-weight: 700;
+  color:       t.$text-primary;
+}
+.npp-artist {
+  font-size: 11px;
+  color:     t.$text-muted;
+}
+.npp-album {
+  font-size:  10px;
+  color:      t.$text-dim;
+  font-style: italic;
+}
+.npp-stats {
+  font-size: 10px;
+  color:     t.$text-dim;
+}
+.npp-stat-tag {
+  color: t.$accent;
+}
+.npp-time {
+  font-size:   10px;
+  font-weight: 600;
+  color:       t.$text-dim;
+}
+.npp-progress-row {
+  min-width: 140px;
+}
+.npp-progress-row.compact {
+  padding-left:  6px;
+  padding-right: 6px;
+}
+.npp-progress-row.compact .npp-time {
+  min-width: 32px;
+}
+.npp-progress-row.compact scale.npp-scale {
+  min-width: 140px;
+}
+.npp-progress-row .npp-time {
+  color: t.$text-secondary;
+}
+separator.npp-progress-separator {
+  min-width:  1px;
+  min-height: 16px;
+  margin:     0 2px;
+  background: t.$overlay-12;
+}
+
+scale.npp-scale {
+  min-width:  160px;
+  min-height: 16px;
+}
+scale.npp-scale trough {
+  background:    t.$overlay-10;
+  border-radius: t.$radius-md;
+  min-height:    5px;
+  border:        none;
+}
+scale.npp-scale trough highlight {
+  background:    linear-gradient(to right, t.$secondary, t.$accent);
+  border-radius: t.$radius-md;
+  min-height:    5px;
+}
+scale.npp-scale slider {
+  background:    t.$accent;
+  border-radius: t.$radius-full;
+  min-width:     12px;
+  min-height:    12px;
+  margin:        -4px;
+  border:        none;
+  box-shadow:    none;
+}
+
+.npp-controls-wrap {
+  background:    t.$bg-item;
+  border:        1px solid t.$border;
+  border-radius: t.$radius-2xl;
+  padding:       2px 6px;
+}
+.npp-ctrl-btn {
+  background:    transparent;
+  border:        none;
+  border-radius: t.$radius-xl;
+  padding:       4px 14px;
+  font-size:     16px;
+  color:         t.$text-primary;
+  transition:    all 0.15s ease, box-shadow 0.3s ease-out;
+}
+.npp-ctrl-btn:hover {
+  background: t.$overlay-10;
+}
+.npp-ctrl-play {
+  font-size: 20px;
+  color:     t.$accent;
+}
+.npp-ctrl-play:hover {
+  color: t.$accent;
+}
+
+.lyrics-flyout-root {
+  min-width: 280px;
+}
+
+.audio-btn.muted {
+  opacity: 0.45;
+}

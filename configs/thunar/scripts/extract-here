@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+set -u
+umask 077
+
+staging=""
+staging_parent=""
+
+cleanup_staging() {
+  [[ -n "${staging}" && -n "${staging_parent}" && -d "${staging}" ]] || return 0
+  local resolved_stage resolved_parent
+  resolved_stage="$(realpath -m -- "${staging}")" || return 0
+  resolved_parent="$(realpath -m -- "${staging_parent}")" || return 0
+  case "${resolved_stage}" in
+    "${resolved_parent}"/.*.extract.*) rm -rf -- "${resolved_stage}" ;;
+  esac
+}
+
+exit_on_signal() {
+  local status="$1"
+  cleanup_staging
+  trap - EXIT HUP INT TERM
+  exit "${status}"
+}
+
+trap cleanup_staging EXIT
+trap 'exit_on_signal 129' HUP
+trap 'exit_on_signal 130' INT
+trap 'exit_on_signal 143' TERM
+
+notify_result() {
+  if command -v notify-send >/dev/null 2>&1; then
+    local -a args=("$1" "$2")
+    [[ -z "${3-}" ]] || args+=(--urgency="$3")
+    notify-send "${args[@]}" || true
+  fi
+}
+
+archive_stem() {
+  local name="${1##*/}"
+  local lower="${name,,}"
+  local suffix
+
+  for suffix in .tar.bz2 .tar.gz .tar.lz4 .tar.lz .tar.xz .tar.zst .bzip2 .gzip .tbz2 .tgz .txz .cb7 .cbr .cbt .cbz .7z .bz2 .gz .iso .lz4 .lz .lzma .rar .tar .xz .zip .zst; do
+    if [[ "${lower}" == *"${suffix}" ]]; then
+      printf '%s' "${name:0:${#name}-${#suffix}}"
+      return
+    fi
+  done
+  printf '%s' "${name}-extracted"
+}
+
+if (( $# == 0 )); then
+  notify_result "Extraction failed" "No archive was selected." critical
+  exit 2
+fi
+
+failures=0
+for archive in "$@"; do
+  if [[ ! -f "${archive}" ]]; then
+    notify_result "Extraction failed" "File not found: ${archive}" critical
+    failures=$((failures + 1))
+    continue
+  fi
+
+  parent="${archive%/*}"
+  if [[ "${parent}" == "${archive}" ]]; then
+    parent="."
+  fi
+  base="$(archive_stem "${archive}")"
+  [[ -n "${base}" ]] || base="Extracted archive"
+  destination="${parent}/${base}"
+  counter=2
+  while [[ -e "${destination}" ]]; do
+    destination="${parent}/${base} (${counter})"
+    ((counter += 1))
+  done
+
+  if ! staging="$(mktemp -d "${parent}/.${base}.extract.XXXXXX")"; then
+    notify_result "Extraction failed" "Could not create a temporary folder beside: ${archive}" critical
+    failures=$((failures + 1))
+    continue
+  fi
+  staging_parent="${parent}"
+
+  extracted=false
+  if command -v bsdtar >/dev/null 2>&1 \
+    && bsdtar -xf "${archive}" -C "${staging}"; then
+    extracted=true
+  else
+    # Never mix a partial libarchive result with the 7z fallback.
+    cleanup_staging
+    staging=""
+    staging_parent=""
+    if staging="$(mktemp -d "${parent}/.${base}.extract.XXXXXX")"; then
+      staging_parent="${parent}"
+      if command -v 7z >/dev/null 2>&1 \
+        && 7z x -y "-o${staging}" -- "${archive}"; then
+        extracted=true
+      fi
+    fi
+  fi
+
+  if [[ "${extracted}" == true ]] && mv -- "${staging}" "${destination}"; then
+    staging=""
+    staging_parent=""
+    notify_result "Archive extracted" "${destination}"
+  else
+    cleanup_staging
+    staging=""
+    staging_parent=""
+    notify_result "Extraction failed" "Could not extract: ${archive}" critical
+    failures=$((failures + 1))
+  fi
+done
+
+(( failures == 0 ))

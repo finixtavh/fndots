@@ -1,0 +1,1 @@
+Note: NONE of these .lyr files are mine, they all have their respective owners, i got this files directly from lrclib.net its a free website.

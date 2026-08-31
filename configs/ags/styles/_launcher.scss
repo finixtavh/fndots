@@ -1,0 +1,117 @@
+@use "tokens" as t;
+
+/* App launcher */
+window.AppLauncher {
+  background: transparent;
+}
+
+.launcher-hitbox {
+  padding: 8px;
+  background: transparent;
+}
+
+.launcher-root {
+  min-width: 360px;
+  padding: 8px;
+  background: t.$bg-glass-strong;
+  border: 1px solid t.$border;
+  border-radius: t.$radius-panel;
+  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono", monospace;
+}
+
+.launcher-search-row {
+  min-height: 40px;
+  padding: 0 6px;
+  border-bottom: 1px solid t.$border-bright;
+}
+
+.launcher-entry {
+  min-height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: t.$text-secondary;
+  caret-color: t.$accent;
+  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono", monospace;
+  font-size: 13px;
+  box-shadow: none;
+}
+
+.launcher-entry:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+.launcher-results-container {
+  margin-top: 4px;
+}
+
+.launcher-results {
+  padding: 0;
+}
+
+.launcher-result {
+  min-height: 48px;
+  padding: 2px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: t.$radius-lg;
+  box-shadow: none;
+  transition: background 150ms ease-out, border-color 150ms ease-out;
+}
+
+.launcher-result:hover,
+.launcher-result:focus,
+.launcher-result.selected {
+  background: t.$overlay-5;
+  border-color: t.$overlay-6;
+  box-shadow: none;
+}
+.launcher-result.selected { border-radius: 0; }
+.launcher-result:active { background: t.$bg-active; }
+
+.launcher-result-icon {
+  min-width: 28px;
+  min-height: 22px;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+}
+
+.launcher-result-name {
+  padding: 0 0 1px;
+  color: t.$text-primary;
+  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.launcher-result.selected .launcher-result-name {
+  color: t.$accent;
+}
+
+.launcher-result-desc {
+  color: t.$text-muted;
+  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono", monospace;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.launcher-empty {
+  min-height: 48px;
+  padding: 6px;
+  color: t.$text-muted;
+  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono", monospace;
+  font-size: 11px;
+}
+
+scrollbar slider {
+  min-height: 30px;
+  background: t.$overlay-8;
+  border-radius: t.$radius-md;
+}
+
+scrollbar {
+  background: transparent;
+}

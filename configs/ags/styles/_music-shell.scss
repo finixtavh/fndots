@@ -1,0 +1,29 @@
+@use "tokens" as t;
+
+/* Music shell */
+window.FlyoutWindow {
+  background: transparent;
+}
+.npp-root,
+.lyrics-flyout-root {
+  @include t.glass-panel;
+}
+.npp-root {
+  border-radius: 0 0 t.$radius-panel t.$radius-panel;
+}
+
+.now-playing-btn {
+  background:    transparent;
+  border:        none;
+  border-radius: 0;
+  padding:       0 0 0 5px;
+  margin:        0 0 0 -5px;
+  transition:    background 120ms ease, box-shadow 0.3s ease-out;
+}
+.now-playing-btn:hover {
+  background: t.$overlay-5;
+}
+.now-playing-btn:focus {
+  box-shadow: none;
+  outline:    none;
+}

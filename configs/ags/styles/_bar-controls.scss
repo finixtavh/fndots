@@ -1,0 +1,70 @@
+@use "tokens" as t;
+
+/* Bar controls */
+.sys-btn {
+  background:    t.$bg-item;
+  border:        1px solid t.$border;
+  border-radius: t.$radius;
+  padding:       2px 8px;
+  min-height:    24px;
+  transition:    all 0.15s ease, box-shadow 0.3s ease-out;
+}
+.sys-btn:hover {
+  background:   t.$bg-item-hover;
+  border-color: t.$border-bright;
+}
+
+.net-btn {
+  padding: 2px 8px;
+}
+
+.batt-pct {
+  font-size:   12px;
+  font-weight: 600;
+  color:       t.$text-primary;
+}
+
+.notif-bell {
+  padding: 2px 8px;
+  border-top-right-radius: 0;
+}
+
+.privacy-indicator {
+  padding: 2px 7px;
+  color: t.$accent;
+}
+
+.color-picker { border-radius: t.$radius; }
+
+.seg {
+  background:    t.$bg-item;
+  border-radius: t.$radius-sm;
+  padding:       0 4px;
+  margin:        5px 0;
+  min-height:    26px;
+}
+.bar-right > .seg:last-child { border-top-right-radius: 0; }
+
+.seg .clock,
+.seg .calendar-btn,
+.seg .audio-btn,
+.seg .sys-btn {
+  background:    transparent;
+  border:        none;
+  border-radius: 0;
+  margin:        0;
+  min-height:    0;
+}
+
+.seg > * + * { box-shadow: inset 1px 0 0 t.$overlay-6; }
+.seg > .privacy-indicator + .notif-bell { box-shadow: none; }
+.seg > .privacy-indicator.privacy-active + .notif-bell { box-shadow: inset 1px 0 0 t.$overlay-6; }
+
+.seg > *:first-child { border-radius: 3px 0 0 3px; }
+.seg > *:last-child  { border-radius: 0 3px 3px 0; }
+
+.seg .calendar-btn:hover,
+.seg .audio-btn:hover,
+.seg .sys-btn:hover { background: t.$bg-item-hover; }
+
+.clock-time { color: t.$accent; }

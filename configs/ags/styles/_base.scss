@@ -1,0 +1,17 @@
+@use "tokens" as t;
+
+/* Base */
+* {
+  font-family: "JetBrainsMono Nerd Font", "Inter", sans-serif;
+  font-size:   13px;
+  color:       t.$text-primary;
+}
+
+window.Bar { background: transparent; }
+window.MusicBar { background: transparent; }
+window.PowerMenu { background: transparent; }
+
+.bar-root {
+  background: t.$bg-deep;
+  min-height: 38px;
+}
