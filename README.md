@@ -34,7 +34,7 @@ bash update.sh --all
 ```
 
 ```bash
--.all        // forces update on all files, even if the repo folder is up-to date
+--all        // forces update on all files, even if the repo folder is up-to date
 --no-backups // doesn't make any backup folder at .local/
 ```
 
