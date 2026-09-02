@@ -40,12 +40,12 @@ bash update.sh --all
 
 ## Repo Structure
 
-* `configs/`  AGS, Hyprland, Cava, Fastfetch, Rofi, Starship, Thunar, Wallman, XDG, and Zsh configs.
+* `configs/`  AGS, Hyprland, Starship, Thunar, Wallman, XDG, and Zsh configs.
 * `apps/`  Standalone apps like as `fnsession` and `fnnetspeed`.
 * `assets/`  Fonts, Cava shaders, and wallpapers.
 
 ### TODO
 * https://wekan.finixtavh.xyz/b/r8XPSqFGZ6h8TPe9h/fn-dots?file= (might be unreliable sometimes)
 
-i dont think someone gonna look at these dotfiles, feel free to PR tho.
+I dont think someone gonna look at these dotfiles, feel free to PR tho.
 
