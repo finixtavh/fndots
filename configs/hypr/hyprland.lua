@@ -48,15 +48,15 @@ hl.config({
 	},
 
 	decoration = {
-		rounding = 12,
-		rounding_power = 2,
+		rounding = 3,
+		rounding_power = 15,
 		active_opacity = 1,
 		inactive_opacity = disable_opacity_blur and 1 or 0.85,
 		dim_inactive = true,
 		dim_strength = 0.02,
 
 		shadow = {
-			enabled = true,
+			enabled = false, -- TODO: change this to something better
 			range = 20,
 			render_power = 4,
 			offset = "0 2",
