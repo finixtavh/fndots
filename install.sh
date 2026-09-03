@@ -700,7 +700,6 @@ validate_dotfiles_source() {
         configs/zsh/functions/fnctl
         apps/fnsession/fnsession
         apps/fnsession/README.md
-        apps/fnsession/test_fnsession.py
         apps/fnnetspeed/fnnetspeed
         apps/fnwall/wallpicker.sh
         apps/fnwall/restore.sh
