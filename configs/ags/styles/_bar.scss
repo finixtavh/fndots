@@ -171,13 +171,13 @@ window.TaskbarMenuWindow {
 }
 .taskbar-menu-box {
   @include t.glass-panel;
-  border-radius: t.$radius;
+  border-radius: 0;
   padding:       6px;
 }
 .taskbar-menu-row {
   background:    transparent;
   border:        none;
-  border-radius: t.$radius;
+  border-radius: t.$radius-xs;
   padding:       5px 9px;
   min-height:    26px;
 }

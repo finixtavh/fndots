@@ -62,9 +62,15 @@ hl.layer_rule({
     ignore_alpha = 0.5,
     animation = "slide top"
 })
+hl.layer_rule({
+    match = { namespace = "ags-notif-center" },
+    blur = layer_blur,
+    ignore_alpha = 0.5,
+    animation = "slide right"
+})
 hl.layer_rule({ match = { namespace = "ags-system-flyout" }, animation = "slide bottom", order = 0 })
 hl.layer_rule({ match = { namespace = "ags-audio-mixer" }, animation = "slide bottom" })
-hl.layer_rule({ match = { namespace = "ags-taskbar-menu" }, animation = "slide bottom", blur = layer_blur })
+hl.layer_rule({ match = { namespace = "ags-taskbar-menu" }, no_anim = true, blur = layer_blur })
 hl.layer_rule({ match = { namespace = "power-menu" }, blur = layer_blur })
 
 hl.layer_rule({ match = { namespace = "ags-osd" }, blur = layer_blur, ignore_alpha = 0.1 })

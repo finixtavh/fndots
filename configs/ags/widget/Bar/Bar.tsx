@@ -1733,10 +1733,10 @@ function openTaskMenu(owner: Gtk.Widget, entries: TaskMenuEntry[], gdkmonitor: G
   } catch (_) {}
 
   win.margin_left = marginStart
-  let marginBottom = 46
+  let marginBottom = 50
   try {
     const barH = owner.get_toplevel()?.get_allocation?.()?.height ?? 0
-    if (Number.isFinite(barH) && barH > 0) marginBottom = barH + 8
+    if (Number.isFinite(barH) && barH > 0) marginBottom = barH
   } catch (_) {}
   win.margin_bottom = marginBottom
 

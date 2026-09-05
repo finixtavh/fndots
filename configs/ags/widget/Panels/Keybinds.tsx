@@ -5,6 +5,7 @@ import GLib from "gi://GLib"
 import { placeWindowAtPointer } from "../Helpers/Monitor"
 import { HYPR_CONFIG_DIR } from "../Helpers/Paths"
 import { trackEscapeDismiss } from "../Helpers/FlyoutState"
+import { iconImage, IC } from "../Helpers/Icons"
 
 declare global {
   namespace JSX {
@@ -14,7 +15,13 @@ declare global {
   }
 }
 
-interface KB { keys: string; action: string; section: string }
+interface KB { keys: string; tokens: string[]; action: string; section: string }
+
+function tok(keys: string): string[] {
+  return keys.split(/\s*\+\s*/).map(s => s.trim()).filter(Boolean)
+}
+
+const MOD_ICONS: Record<string, string> = { SUPER: 'super', CTRL: 'ctrl', ALT: 'alt', SHIFT: 'shift' }
 
 const CATEGORY_MAP: Record<string, string> = {
   'Apps':                      'Aplicaciones',
@@ -38,18 +45,18 @@ const CATEGORY_MAP: Record<string, string> = {
 const CATEGORY_ORDER = ['Aplicaciones', 'Ventanas', 'Workspaces', 'Multimedia', 'Utilidades', 'Sistema']
 
 const COMMON: KB[] = [
-  { keys: 'SUPER + Enter',      action: 'Terminal (Kitty)',    section: 'common' },
-  { keys: 'SUPER + W',          action: 'Firefox',             section: 'common' },
-  { keys: 'SUPER + E',          action: 'File Manager',        section: 'common' },
-  { keys: 'SUPER + C',          action: 'Command Center',      section: 'common' },
-  { keys: "SUPER + '",          action: 'Keybind Viewer',      section: 'common' },
-  { keys: 'SUPER + Q',          action: 'Close Window',        section: 'common' },
-  { keys: 'SUPER + F',          action: 'Fullscreen Toggle',   section: 'common' },
-  { keys: 'SUPER + D',          action: 'Maximize Toggle',     section: 'common' },
-  { keys: 'SUPER + L',          action: 'Lock Screen',         section: 'common' },
-  { keys: 'SUPER + SHIFT + S',  action: 'Screenshot Region',   section: 'common' },
-  { keys: 'SUPER + V',          action: 'Dashboard (Clipboard)', section: 'common' },
-  { keys: 'SUPER + Period',     action: 'Emoji Picker',        section: 'common' },
+  { keys: 'SUPER + Enter',      tokens: tok('SUPER + Enter'),      action: 'Terminal (Kitty)',    section: 'common' },
+  { keys: 'SUPER + W',          tokens: tok('SUPER + W'),          action: 'Firefox',             section: 'common' },
+  { keys: 'SUPER + E',          tokens: tok('SUPER + E'),          action: 'File Manager',        section: 'common' },
+  { keys: 'SUPER + C',          tokens: tok('SUPER + C'),          action: 'Command Center',      section: 'common' },
+  { keys: "SUPER + '",          tokens: tok("SUPER + '"),          action: 'Keybind Viewer',      section: 'common' },
+  { keys: 'SUPER + Q',          tokens: tok('SUPER + Q'),          action: 'Close Window',        section: 'common' },
+  { keys: 'SUPER + F',          tokens: tok('SUPER + F'),          action: 'Fullscreen Toggle',   section: 'common' },
+  { keys: 'SUPER + D',          tokens: tok('SUPER + D'),          action: 'Maximize Toggle',     section: 'common' },
+  { keys: 'SUPER + L',          tokens: tok('SUPER + L'),          action: 'Lock Screen',         section: 'common' },
+  { keys: 'SUPER + SHIFT + S',  tokens: tok('SUPER + SHIFT + S'),  action: 'Screenshot Region',   section: 'common' },
+  { keys: 'SUPER + V',          tokens: tok('SUPER + V'),          action: 'Dashboard (Clipboard)', section: 'common' },
+  { keys: 'SUPER + Period',     tokens: tok('SUPER + Period'),     action: 'Emoji Picker',        section: 'common' },
 ]
 
 const _dec = new TextDecoder()
@@ -128,15 +135,25 @@ function parseKeybinds(): KB[] {
       const rawKey = keyM[1]
       if (rawKey.includes('tostring')) continue
 
-      const keys = rawKey
-        .replace(/mainMod\s*\.\.\s*["']/g, 'SUPER + ')
-        .replace(/mainMod\s*\.\./g,        'SUPER ')
-        .replace(/["']/g,                  '')
-        .replace(/\s*\+\s*/g,              ' + ')
-        .replace(/SUPER_L|Super_L/g,       'SUPER')
-        .trim()
+      const tokens = rawKey
+        .split('..')
+        .map(part => {
+          const p = part.trim()
+          if (/^mainMod$/.test(p)) return 'SUPER'
+          const m = p.match(/^["'](.*)["']$/)
+          return (m ? m[1] : p).trim()
+            .replace(/SUPER_L/g, 'SUPER')
+            .replace(/Super_L/g, 'SUPER')
+        })
+        .filter(Boolean)
+        .join(' ')
+        .split(/\s*\+\s*/)
+        .map(s => s.trim())
+        .filter(Boolean)
+      if (!tokens.length) continue
+      const keys = tokens.join(' + ')
 
-      if (!keys || /[{}()\[\].]/.test(keys)) continue
+      if (/[{}()\[\].]/.test(keys)) continue
 
       let action = ''
       const execM = t.match(/exec_cmd\("([^"]+)"\)/)
@@ -165,10 +182,35 @@ function parseKeybinds(): KB[] {
         else action = `Workspace ${ws}`
       }
 
-      if (action) res.push({ keys, action, section })
+      if (action) res.push({ keys, tokens, action, section })
     }
   } catch (_) {}
   return res
+}
+
+function buildKeysBox(tokens: string[], minWidth: number): Gtk.Box {
+  const box = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 4, visible: true })
+  const contentW = tokens.reduce((w, token, i) => {
+    const sep = i > 0 ? 14 : 0 // '+' label + spacing
+    return w + sep + (MOD_ICONS[token.toUpperCase()] ? 18 : token.length * 9 + 16)
+  }, 8)
+  box.set_size_request(Math.max(minWidth, contentW), -1)
+  tokens.forEach((token, i) => {
+    if (i > 0) {
+      const plus = new Gtk.Label({ label: '+', visible: true })
+      plus.get_style_context().add_class('kb-plus')
+      box.add(plus)
+    }
+    const iconName = MOD_ICONS[token.toUpperCase()]
+    if (iconName) {
+      box.add(iconImage(iconName, IC.accent, 14))
+    } else {
+      const kl = new Gtk.Label({ label: token, visible: true })
+      kl.get_style_context().add_class('kb-key')
+      box.add(kl)
+    }
+  })
+  return box
 }
 
 export default function Keybinds() {
@@ -240,15 +282,13 @@ export default function Keybinds() {
 
           const grid = new Gtk.Grid({ visible: true, column_spacing: 28, row_spacing: 3 })
           grid.get_style_context().add_class('kb-common-grid')
-          COMMON.forEach(({ keys, action }, i) => {
+          COMMON.forEach(({ tokens, action }, i) => {
             const col = (i % 2) * 2
             const row = Math.floor(i / 2)
-            const kl = new Gtk.Label({ label: keys,   visible: true, xalign: 0 })
-            kl.get_style_context().add_class('kb-key')
-            kl.set_width_chars(26)
+            const kb = buildKeysBox(tokens, 220)
             const al = new Gtk.Label({ label: action, visible: true, xalign: 0 })
             al.get_style_context().add_class('kb-action')
-            grid.attach(kl, col,     row, 1, 1)
+            grid.attach(kb, col,     row, 1, 1)
             grid.attach(al, col + 1, row, 1, 1)
           })
           self.add(grid)
@@ -295,7 +335,7 @@ export default function Keybinds() {
             listBox.get_style_context().add_class('kb-list')
             catBox.add(listBox)
 
-            const rows: Row[] = grouped.get(cat)!.map(({ keys, action }) => {
+            const rows: Row[] = grouped.get(cat)!.map(({ keys, tokens, action }) => {
               const row = new Gtk.ListBoxRow({ visible: true })
               row.get_style_context().add_class('kb-row')
               const hbox = new Gtk.Box({
@@ -304,13 +344,13 @@ export default function Keybinds() {
                 margin_start: 8, margin_end: 8,
                 margin_top: 3, margin_bottom: 3,
               })
-              const kl = new Gtk.Label({ label: keys,   visible: true, xalign: 0 })
-              kl.get_style_context().add_class('kb-key')
-              kl.set_width_chars(30)
+              const kb = buildKeysBox(tokens, 260)
+              const sep = new Gtk.Label({ label: '//', visible: true })
+              sep.get_style_context().add_class('kb-sep')
               const al = new Gtk.Label({ label: action, visible: true, xalign: 0 })
               al.get_style_context().add_class('kb-action')
               al.set_hexpand(true)
-              hbox.add(kl); hbox.add(al)
+              hbox.add(kb); hbox.add(sep); hbox.add(al)
               row.add(hbox)
               listBox.add(row)
               return { keyLow: keys.toLowerCase(), actLow: action.toLowerCase(), row }

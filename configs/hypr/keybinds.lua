@@ -38,7 +38,7 @@ hl.bind(
 hl.bind(
     "Caps_Lock",
     hl.dsp.exec_cmd("ags request -i ags-bar osd-caps"),
-    { release = true, non_consuming = true, transparent = true }
+    { non_consuming = true, transparent = true }
 )
 restricted_bind(mainMod .. "+SHIFT+ALT + W", hl.dsp.exec_cmd(paths.shell_quote(paths.home_path("fn-apps/fnwall/wallpicker.sh")) .. " --random"))
 restricted_bind(mainMod .. " + Period", hl.dsp.exec_cmd("ags request -i ags-bar show-dashboard-emoji"))

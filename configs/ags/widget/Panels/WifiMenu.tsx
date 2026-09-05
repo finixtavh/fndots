@@ -741,6 +741,9 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
   const loadList = () => {
     const generation = ++listLoadGeneration
 
+    fetchKnownNetworks().then(set => {
+      if (!closed && generation === listLoadGeneration) knownNets = set
+    })
     execAsync(['iwctl', 'station', iface, 'get-networks'])
       .then((raw: string) => {
         if (closed || generation !== listLoadGeneration) return

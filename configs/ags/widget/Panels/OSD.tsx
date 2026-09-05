@@ -779,6 +779,20 @@ export default function OSD(monitors: Gdk.Monitor[]) {
   let keymap: Gdk.Keymap | null = null
   let caps = false
   let showDefaultMute: ((kind: 'output' | 'input', force?: boolean) => void) | null = null
+
+  async function readCapsLockState(): Promise<boolean> {
+    try {
+      const out = await execAsync(['hyprctl', 'devices', '-j'])
+      const j = JSON.parse(out)
+      const keyboards = Array.isArray(j?.keyboards) ? j.keyboards : []
+      const main = keyboards.find((kb: any) => kb?.main === true && typeof kb?.capsLock === 'boolean')
+      if (main) return !!main.capsLock
+      const anyKb = keyboards.find((kb: any) => typeof kb?.capsLock === 'boolean')
+      if (anyKb) return !!anyKb.capsLock
+    } catch (_) {}
+    try { if (keymap) return !!keymap.get_caps_lock_state() } catch (_) {}
+    return caps
+  }
   try {
     const defaultKeymap = Gdk.Keymap.get_default()
     if (defaultKeymap) {
@@ -799,14 +813,12 @@ export default function OSD(monitors: Gdk.Monitor[]) {
 
   const unsubscribeOsdEvents = subscribeOsdEvents(event => {
     if (event === 'caps') {
-      GLib.timeout_add(GLib.PRIORITY_DEFAULT, 45, () => {
-        const next = keymap?.get_caps_lock_state() ?? caps
+      readCapsLockState().then(next => {
         caps = next
         show({
           key: 'caps', kind: 'caps', icon: ICONS.caps,
           value: next ? 100 : 0, state: next,
         })
-        return GLib.SOURCE_REMOVE
       })
       return
     }

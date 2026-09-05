@@ -45,6 +45,47 @@ const MISS_TTL_MS = 30 * 24 * 60 * 60 * 1000
 const MAX_MISS_ENTRIES = 512
 let missCache: Record<string, number> | null = null
 
+const BLACKLIST_FILE = cachePath('ags', 'lrclib-blacklist.json')
+let blacklist: Set<string> | null = null
+let blacklistMtime = 0
+
+function loadBlacklist(): Set<string> {
+  try {
+    const info = Gio.File.new_for_path(BLACKLIST_FILE)
+      .query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null)
+    const mtime = Number(info.get_modification_date_time()?.to_unix?.() ?? 0)
+    if (blacklist && mtime === blacklistMtime) return blacklist
+    const [ok, raw] = GLib.file_get_contents(BLACKLIST_FILE)
+    const set = new Set<string>()
+    if (ok) {
+      const j = JSON.parse(new TextDecoder().decode(raw))
+      if (j && typeof j === 'object' && !Array.isArray(j)) {
+        for (const entry of Object.values(j)) {
+          const e = entry as { artist?: unknown; title?: unknown }
+          if (e && typeof e.artist === 'string' && typeof e.title === 'string') {
+            set.add(normalizedTrackKey(e.artist, e.title))
+          }
+        }
+      }
+    }
+    blacklist = set
+    blacklistMtime = mtime
+    return set
+  } catch (_) {
+    if (!GLib.file_test(BLACKLIST_FILE, GLib.FileTest.EXISTS)) {
+      blacklist = new Set<string>()
+      blacklistMtime = 0
+    } else if (!blacklist) {
+      blacklist = new Set<string>()
+    }
+    return blacklist
+  }
+}
+
+export function isLrclibBlacklisted(artist: string, track: string): boolean {
+  return loadBlacklist().has(normalizedTrackKey(artist, track))
+}
+
 function missKey(artist: string, track: string): string {
   return normalizedTrackKey(artist, track)
 }
@@ -115,6 +156,10 @@ const DUR_TOLERANCE_SEC = 12
 export function fetchLrclib(artist: string, track: string, album: string, durationSec: number): Promise<LrclibTrack | null> {
   if (LOW_END) return Promise.resolve(null)
   if (!artist || !track || durationSec <= 0) return Promise.resolve(null)
+  if (isLrclibBlacklisted(artist, track)) {
+    logEvent('lrclib', 'blacklist', `"${track}" — "${artist}"`)
+    return Promise.resolve(null)
+  }
   if (isLrclibMissFresh(artist, track)) {
     logEvent('lrclib', 'cache', `"${track}" — "${artist}"`)
     return Promise.resolve(null)

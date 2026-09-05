@@ -2,11 +2,20 @@
 import app from "ags/gtk3/app"
 import { Astal, Gtk, Gdk } from "ags/gtk3"
 import GLib from "gi://GLib"
+import { execAsync } from "ags/process"
 import AstalNotifd from "gi://AstalNotifd"
 import GdkPixbuf from "gi://GdkPixbuf"
 import { createState, createEffect, onCleanup } from "ags"
 import { iconImage, IC } from "../Helpers/Icons"
+import { derr } from "../Helpers/DashLog"
+import { AGS_CONFIG_DIR, HYPR_CONFIG_DIR } from "../Helpers/Paths"
+import { loadSettings, saveSettings } from "../Helpers/UserSettings"
 import { trackEscapeDismiss } from "../Helpers/FlyoutState"
+
+const AGS_LAUNCHER = GLib.build_filenamev([AGS_CONFIG_DIR, 'scripts', 'launch-ags.sh'])
+const HYPRSUNSET_APPLY = GLib.build_filenamev([
+  HYPR_CONFIG_DIR, 'scripts', 'hyprland', 'apply-hyprsunset.sh',
+])
 
 const notifd = AstalNotifd.get_default()
 
@@ -142,6 +151,8 @@ export function buildNotifItem(n: any, onDismiss: () => void): Gtk.Box {
 export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
   let win: Astal.Window
   const { TOP, RIGHT } = Astal.WindowAnchor
+  // BAR_HEIGHT (50, ver OSD.tsx) + 5px de gap sobre la MainBar
+  const PANEL_BOTTOM_GAP = 55
 
   const [notifs, setNotifs] = createState<any[]>([])
 
@@ -174,7 +185,11 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
         win = self
         trackEscapeDismiss(self, () => self.set_visible(false))
         self.connect('notify::visible', () => {
-          if (!self.get_visible()) return
+          if (!self.get_visible()) {
+            const ch = self.get_children()[0] as any
+            if (ch) ch.set_reveal_child(false)
+            return
+          }
           GLib.timeout_add(GLib.PRIORITY_DEFAULT, 30, () => {
             const ch = self.get_children()[0] as any
             if (ch) ch.set_reveal_child(true)
@@ -190,7 +205,7 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
       exclusivity={Astal.Exclusivity.IGNORE}
       layer={Astal.Layer.OVERLAY}
       anchor={TOP | RIGHT}
-      marginTop={60}
+      marginTop={0}
       marginRight={0}
       keymode={Astal.Keymode.ON_DEMAND}
       application={app}
@@ -247,8 +262,9 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
 
           const scroll = new Gtk.ScrolledWindow({ visible: true })
           scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-          scroll.set_min_content_height(750)
-          scroll.set_max_content_height(750)
+          const panelH = Math.max(220, gdkmonitor.get_geometry().height - PANEL_BOTTOM_GAP)
+          scroll.set_min_content_height(panelH)
+          scroll.set_max_content_height(panelH)
           self.add(scroll)
 
           const list = new Gtk.Box({
@@ -280,6 +296,75 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
             }
             list.show_all()
           })
+
+          const sep2 = new Gtk.Separator({ orientation: Gtk.Orientation.HORIZONTAL, visible: true })
+          self.add(sep2)
+
+          const actionsOuter = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL, spacing: 10,
+            visible: true, margin_start: 14, margin_end: 14,
+            margin_top: 10, margin_bottom: 8,
+          })
+          const actionsTitle = new Gtk.Label({ label: 'Quick Actions', visible: true, xalign: 0 })
+          actionsTitle.get_style_context().add_class('notif-actions-title')
+          actionsOuter.add(actionsTitle)
+
+          const grid = new Gtk.Grid({ visible: true, column_spacing: 8, row_spacing: 8, hexpand: true })
+          grid.set_column_homogeneous(true)
+          actionsOuter.add(grid)
+
+          const runAction = (argv: string[]) => {
+            execAsync(argv).catch(e => derr('[NotificationCenter]', e))
+          }
+          const mkActionBtn = (icon: string, label: string, isPower: boolean, onClicked: () => void) => {
+            const btn = new Gtk.Button({ visible: true, tooltip_text: label })
+            btn.get_style_context().add_class('notif-action-btn')
+            if (isPower) btn.get_style_context().add_class('notif-action-power')
+            const inner = new Gtk.Box({
+              orientation: Gtk.Orientation.VERTICAL, spacing: 6, visible: true,
+              halign: Gtk.Align.CENTER, valign: Gtk.Align.CENTER,
+            })
+            inner.add(iconImage(icon, isPower ? '#f87171' : IC.accent, 28))
+            const lbl = new Gtk.Label({ label, visible: true, halign: Gtk.Align.CENTER })
+            lbl.get_style_context().add_class('notif-action-label')
+            inner.add(lbl)
+            btn.add(inner)
+            btn.connect('clicked', onClicked)
+            return btn
+          }
+
+          let nightEnabled = loadSettings().hyprsunsetEnabled === true
+          let nightBtn: Gtk.Button | null = null
+          const syncNightBtn = () => {
+            if (!nightBtn) return
+            const ctx = nightBtn.get_style_context()
+            if (nightEnabled) ctx.add_class('notif-action-active')
+            else ctx.remove_class('notif-action-active')
+            nightBtn.set_tooltip_text(nightEnabled ? 'Night Light — On · 4000 K' : 'Night Light — Off')
+          }
+
+          grid.attach(mkActionBtn('refresh', 'Restart Bar', false, () => {
+            runAction(['bash', '-c', 'ags quit -i ags-bar; sleep 0.3; nohup "$1" >/dev/null 2>&1 &', 'restart-bar', AGS_LAUNCHER])
+          }), 0, 0, 1, 1)
+          grid.attach(mkActionBtn('dashboard', 'Dashboard', false, () => {
+            runAction(['ags', 'toggle', '-i', 'ags-bar', 'dashboard'])
+          }), 1, 0, 1, 1)
+          grid.attach(mkActionBtn('power', 'Power', true, () => {
+            runAction(['ags', 'toggle', '-i', 'ags-bar', 'power-menu'])
+          }), 2, 0, 1, 1)
+          grid.attach(mkActionBtn('cog', 'Settings', false, () => {
+            runAction(['ags', 'toggle', '-i', 'ags-bar', 'cava-settings'])
+          }), 3, 0, 1, 1)
+          nightBtn = mkActionBtn('w-sunny', 'Night Light', false, () => {
+            nightEnabled = !nightEnabled
+            saveSettings({ hyprsunsetEnabled: nightEnabled })
+            syncNightBtn()
+            runAction([HYPRSUNSET_APPLY])
+          })
+          grid.attach(nightBtn, 0, 1, 1, 1)
+          syncNightBtn()
+
+          self.add(actionsOuter)
 
           self.show_all()
         }}

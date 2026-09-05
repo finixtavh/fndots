@@ -549,7 +549,9 @@ install_deps() {
         noto-fonts noto-fonts-emoji noto-fonts-cjk \
         \
         polkit-kde-agent \
-        gnome-system-monitor
+        gnome-system-monitor \
+        \
+        iwd bluez bluez-utils
 
     
     command -v cargo &>/dev/null || install_pacman rust
@@ -563,6 +565,7 @@ install_deps() {
         libastal-4-git \
         libastal-apps-git \
         libastal-bluetooth-git \
+        libastal-wifi-git \
         libastal-hyprland-git \
         libastal-mpris-git \
         libastal-notifd-git \
@@ -575,6 +578,31 @@ install_deps() {
         zsh-auto-notify
 
     ok "All dependencies installed"
+}
+
+install_oh_my_zsh() {
+    header "oh-my-zsh"
+    local omz_dir="$HOME/.oh-my-zsh"
+    if [[ -d "$omz_dir" ]]; then
+        ok "oh-my-zsh already installed ($omz_dir)"
+        return 0
+    fi
+    info "Installing oh-my-zsh (unattended)..."
+    local omz_installer=""
+    omz_installer="$(mktemp --suffix=-oh-my-zsh-install.sh)" || {
+        err "Could not create a temporary file for the oh-my-zsh installer."
+        return 1
+    }
+    if curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o "$omz_installer" \
+        && [[ -s "$omz_installer" ]] \
+        && KEEP_ZSHRC=yes RUNZSH=no CHSH=no sh "$omz_installer" "" --unattended; then
+        rm -f -- "$omz_installer" || true
+        ok "oh-my-zsh installed to $omz_dir"
+    else
+        rm -f -- "$omz_installer" || true
+        err "oh-my-zsh installation failed."
+        return 1
+    fi
 }
 
 validate_runtime_versions() {
@@ -614,13 +642,19 @@ validate_keyboard_layout() {
     ok "Keyboard layout is available: $KEYBOARD_LAYOUT"
 }
 
-report_soft_dependencies() {
-    if ! command -v iwctl &>/dev/null; then
-        warn "iwd is not installed; the Wi-Fi widget will remain disabled (optional package: iwd)."
-    fi
+require_network_stack() {
+    local missing=()
+    command -v iwctl &>/dev/null || missing+=("iwd")
     if [[ ! -x /usr/lib/bluetooth/bluetoothd ]] && ! command -v bluetoothd &>/dev/null; then
-        warn "BlueZ is not installed; the Bluetooth widget will remain hidden (optional package: bluez)."
+        missing+=("bluez bluez-utils")
     fi
+    pkg_installed libastal-wifi-git || missing+=("libastal-wifi-git")
+    pkg_installed libastal-bluetooth-git || missing+=("libastal-bluetooth-git")
+    if (( ${#missing[@]} > 0 )); then
+        err "Missing required Wi-Fi/Bluetooth dependencies: ${missing[*]}."
+        return 1
+    fi
+    ok "Wi-Fi/Bluetooth stack present (iwd, BlueZ, libastal-wifi, libastal-bluetooth)"
 }
 
 # Clone repo 
@@ -1218,19 +1252,15 @@ enable_services() {
         fi
     done
 
-    if command -v iwctl &>/dev/null; then
-        if sudo systemctl enable --now iwd.service; then
-            ok "iwd.service enabled and started"
-        else
-            warn "iwd is installed, but iwd.service could not be enabled."
-        fi
+    if sudo systemctl enable --now iwd.service; then
+        ok "iwd.service enabled and started"
+    else
+        warn "iwd.service could not be enabled."
     fi
-    if [[ -x /usr/lib/bluetooth/bluetoothd ]] || command -v bluetoothd &>/dev/null; then
-        if sudo systemctl enable --now bluetooth.service; then
-            ok "bluetooth.service enabled and started"
-        else
-            warn "BlueZ is installed, but bluetooth.service could not be enabled."
-        fi
+    if sudo systemctl enable --now bluetooth.service; then
+        ok "bluetooth.service enabled and started"
+    else
+        warn "bluetooth.service could not be enabled."
     fi
 
     return "$failed"
@@ -1294,9 +1324,10 @@ main() {
     clone_dotfiles
     validate_dotfiles_source
     install_deps
+    install_oh_my_zsh
     validate_runtime_versions
     validate_keyboard_layout
-    report_soft_dependencies
+    require_network_stack || return 1
     verify_icon_stack
     install_chroma
     install_battery_limit_helper

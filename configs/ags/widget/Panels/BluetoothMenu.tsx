@@ -409,6 +409,17 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
     await execAsync(['bluetoothctl', 'connect', address])
   }
 
+  const isAgentError = (message: string): boolean =>
+    /agent|authenticat|authoriz|confirm|pin|passkey|pairing.*(reject|abort|cancel)/i.test(message)
+
+  const showConnectError = (message: string) => {
+    if (isAgentError(message)) {
+      showError('Pairing needs confirmation on the device — pair from system Bluetooth settings, then Connect.')
+    } else {
+      showError("Connection failed: " + message)
+    }
+  }
+
   const connectDevice = async (dev: AstalBluetooth.Device) => {
     const address = dev.address
     if (busyAddresses.has(address) || dev.connecting) return
@@ -442,10 +453,10 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
         try {
           await repairAndConnect(address)
         } catch (retryError: unknown) {
-          if (!closed) showError('Re-pair failed: ' + errorMessage(retryError))
+          if (!closed) showConnectError(errorMessage(retryError))
         }
       } else {
-        showError("Connection failed: " + message)
+        showConnectError(message)
       }
     } finally {
       busyAddresses.delete(address)
