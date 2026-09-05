@@ -225,10 +225,11 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
           })
 
           const titleRow = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 8, visible: true })
-          const titleIco = iconImage('bell-fill', IC.accent, 16)
+          const bellEmpty = iconImage('bell', IC.dim, 16)
+          const bellFull = iconImage('bell-fill', IC.accent, 16)
           const titleLbl = new Gtk.Label({ label: 'Notifications', visible: true, xalign: 0, hexpand: true })
           titleLbl.get_style_context().add_class('notif-panel-title')
-          titleRow.add(titleIco); titleRow.add(titleLbl)
+          titleRow.add(bellEmpty); titleRow.add(bellFull); titleRow.add(titleLbl)
           const clearBtn = new Gtk.Button({ visible: true })
           clearBtn.get_style_context().add_class('notif-clear-btn')
           clearBtn.add(new Gtk.Label({ label: 'Clear', visible: true }))
@@ -282,6 +283,9 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
 
           createEffect(() => {
             const ns = notifs()
+
+            bellEmpty.set_visible(ns.length === 0)
+            bellFull.set_visible(ns.length > 0)
 
             list.get_children().forEach((c: any) => { if (c === emptyLbl) list.remove(c); else c.destroy() })
 
