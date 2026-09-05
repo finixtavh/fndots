@@ -48,7 +48,7 @@ const COMMON: KB[] = [
   { keys: 'SUPER + Enter',      tokens: tok('SUPER + Enter'),      action: 'Terminal (Kitty)',    section: 'common' },
   { keys: 'SUPER + W',          tokens: tok('SUPER + W'),          action: 'Firefox',             section: 'common' },
   { keys: 'SUPER + E',          tokens: tok('SUPER + E'),          action: 'File Manager',        section: 'common' },
-  { keys: 'SUPER + C',          tokens: tok('SUPER + C'),          action: 'Command Center',      section: 'common' },
+  { keys: 'SUPER + C',          tokens: tok('SUPER + C'),          action: 'Notification Center', section: 'common' },
   { keys: "SUPER + '",          tokens: tok("SUPER + '"),          action: 'Keybind Viewer',      section: 'common' },
   { keys: 'SUPER + Q',          tokens: tok('SUPER + Q'),          action: 'Close Window',        section: 'common' },
   { keys: 'SUPER + F',          tokens: tok('SUPER + F'),          action: 'Fullscreen Toggle',   section: 'common' },
@@ -86,7 +86,7 @@ function humanize(cmd: string): string {
   if (c.includes('emoji'))                                return 'Emoji Picker'
   if (c.includes('wallpaper'))                            return 'Random Wallpaper'
   if (c.includes('powermenu'))                            return 'Power Menu'
-  if (c.includes('ags toggle') && c.includes('command-center'))  return 'Command Center'
+  if (c.includes('ags toggle') && c.includes('notif-center'))        return 'Notification Center'
   if (c.includes('ags toggle') && c.includes('power-menu'))      return 'Power Menu'
   if (c.includes('ags toggle') && c.includes('keybinds'))        return 'Keybind Viewer'
   if (c.includes('ags toggle') && c.includes('dashboard'))       return 'Dashboard'

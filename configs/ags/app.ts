@@ -9,7 +9,6 @@ import PowerMenu from "./widget/Panels/PowerMenu"
 import OSD from "./widget/Panels/OSD"
 import NotificationCenter from "./widget/Panels/NotificationCenter"
 import NotificationPopup from "./widget/Panels/NotificationPopup"
-import CommandCenter from "./widget/Panels/CommandCenter"
 import Keybinds from "./widget/Panels/Keybinds"
 import SettingsPanel from "./widget/Panels/SettingsPanel"
 import DashboardPanel, { showDashboardPage } from "./widget/Panels/DashboardPanel"
@@ -88,7 +87,6 @@ app.start({
     })
     OSD(monitors)
     PowerMenu()
-    CommandCenter()
     Keybinds()
     SettingsPanel()
     DashboardPanel()

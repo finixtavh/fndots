@@ -8,6 +8,7 @@ import { execAsync } from "ags/process"
 import app from "ags/gtk3/app"
 import { iconImage, IC } from "../Helpers/Icons"
 import { makeErrorToast } from "../Helpers/Toast"
+import { derr } from "../Helpers/DashLog"
 import { registerFlyout, trackEscapeDismiss } from "../Helpers/FlyoutState"
 import {
   networkFlyoutLayoutEnabled,
@@ -164,7 +165,11 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
   root.add(hdr)
   root.add(new Gtk.Separator({ orientation: Gtk.Orientation.HORIZONTAL, visible: true }))
 
-  const [errorToast, showError] = makeErrorToast()
+  const [errorToast, toastError] = makeErrorToast()
+  const showError = (msg: string, opts?: { silent?: boolean }) => {
+    toastError(msg)
+    if (!opts?.silent) { try { derr('[Bluetooth]', msg) } catch (_) {} }
+  }
   root.add(errorToast)
 
   const scroll = new Gtk.ScrolledWindow({ visible: true })

@@ -184,6 +184,7 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
       $={(self: any) => {
         win = self
         trackEscapeDismiss(self, () => self.set_visible(false))
+        self.set_size_request(420, Math.max(280, gdkmonitor.get_geometry().height - PANEL_BOTTOM_GAP))
         self.connect('notify::visible', () => {
           if (!self.get_visible()) {
             const ch = self.get_children()[0] as any
@@ -262,9 +263,7 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
 
           const scroll = new Gtk.ScrolledWindow({ visible: true })
           scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-          const panelH = Math.max(220, gdkmonitor.get_geometry().height - PANEL_BOTTOM_GAP)
-          scroll.set_min_content_height(panelH)
-          scroll.set_max_content_height(panelH)
+          scroll.set_vexpand(true)
           self.add(scroll)
 
           const list = new Gtk.Box({

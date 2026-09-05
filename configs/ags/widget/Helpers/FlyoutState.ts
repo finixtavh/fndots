@@ -9,7 +9,6 @@ export const FLYOUT_WINDOW_CLASSES = [
   "CalendarPopup",
   "BarFlyoutWindow",
   "FlyoutWindow",
-  "CommandCenter",
   "NotifCenter",
   "PowerMenu",
   "SettingsPanel",

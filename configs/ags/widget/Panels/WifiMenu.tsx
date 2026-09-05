@@ -8,6 +8,7 @@ import { execAsync } from "ags/process"
 import app from "ags/gtk3/app"
 import { iconImage, IC } from "../Helpers/Icons"
 import { makeErrorToast } from "../Helpers/Toast"
+import { derr } from "../Helpers/DashLog"
 import { registerFlyout, trackEscapeDismiss } from "../Helpers/FlyoutState"
 import {
   networkFlyoutLayoutEnabled,
@@ -450,7 +451,11 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
   root.add(hdr)
   root.add(new Gtk.Separator({ orientation: Gtk.Orientation.HORIZONTAL, visible: true }))
 
-  const [errorToast, showError] = makeErrorToast()
+  const [errorToast, toastError] = makeErrorToast()
+  const showError = (msg: string, opts?: { silent?: boolean }) => {
+    toastError(msg)
+    if (!opts?.silent) { try { derr('[WiFi]', msg) } catch (_) {} }
+  }
   root.add(errorToast)
 
   const bwRow = new Gtk.Box({
@@ -551,12 +556,12 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
       const doConnect = () => {
         const pass = passEntry?.get_text?.() ?? ''
         if (!isOpen && !pass && !isKnown) {
-          showError('Enter the network password.')
+          showError('Enter the network password.', { silent: true })
           passEntry?.grab_focus()
           return
         }
         if (/EAP|802\.1X/i.test(ap.security)) {
-          showError('Enterprise iwd networks need a username/certificate flow not configured in this widget.')
+          showError('Enterprise iwd networks need a username/certificate flow not configured in this widget.', { silent: true })
           return
         }
         scanGeneration++
