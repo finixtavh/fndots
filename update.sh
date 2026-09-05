@@ -17,8 +17,7 @@ Options:
             Do not retain previous dotfiles below XDG_STATE_HOME.
   --net-backend=MODE
             Switch the Wi-Fi stack now: nm-iwd (NetworkManager with iwd
-            backend) or iwd-only (NetworkManager disabled). You will be
-            asked to confirm before services are changed.
+            backend) or iwd-only (NetworkManager disabled).
   -h, --help
             Show this.
 EOF
@@ -513,7 +512,6 @@ print_update_done() {
     if [[ $INSTALLER_CHANGED -eq 1 ]]; then
         echo -e "  ${Y}install.sh changed; rerun it if the update added system dependencies.${N}"
     fi
-    echo -e "  No .bak or .bak2 files were created."
     if [[ $AGS_UPDATED -eq 1 ]]; then
         echo ""
         echo -e "  ${Y}Restart AGS to load AGS changes:${N}"
