@@ -136,8 +136,10 @@ window.DashboardPanel separator {
   &.current { border-color: t.$accent; }
 }
 .wall-thumb {
-  min-width: 168px;
-  min-height: 94px;
+  min-width: 184px;
+  min-height: 103px;
+  margin-top: 1px;
+  margin-bottom: -1px;
   color: t.$text-muted;
   background: t.$bg-deep;
 }
