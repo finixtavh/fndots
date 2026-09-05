@@ -63,6 +63,10 @@
 .seg > *:first-child { border-radius: 3px 0 0 3px; }
 .seg > *:last-child  { border-radius: 0 3px 3px 0; }
 
+.seg-sysmon { border-radius: t.$radius-xs; }
+.seg-sysmon > *:first-child,
+.seg-sysmon > *:last-child { border-radius: t.$radius-xs; }
+
 .seg .calendar-btn:hover,
 .seg .audio-btn:hover,
 .seg .sys-btn:hover { background: t.$bg-item-hover; }

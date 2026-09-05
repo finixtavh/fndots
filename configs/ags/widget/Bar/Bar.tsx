@@ -2489,7 +2489,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         <VolumeWidget gdkmonitor={gdkmonitor} />
         <MicWidget gdkmonitor={gdkmonitor} />
       </box>
-      <box class="seg">
+      <box class="seg seg-sysmon">
         <CpuWidget gdkmonitor={gdkmonitor} />
         <RamWidget gdkmonitor={gdkmonitor} />
       </box>

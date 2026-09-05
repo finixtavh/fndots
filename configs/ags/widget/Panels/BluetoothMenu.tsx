@@ -4,6 +4,7 @@ import GLib from "gi://GLib"
 import Gio from "gi://Gio"
 import AstalBluetooth from "gi://AstalBluetooth?version=0.1"
 import { Gdk, Astal } from "ags/gtk3"
+import { execAsync } from "ags/process"
 import app from "ags/gtk3/app"
 import { iconImage, IC } from "../Helpers/Icons"
 import { makeErrorToast } from "../Helpers/Toast"
@@ -300,6 +301,7 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
       if (dev.connected) cls(line, 'wifi-ap-active')
 
       const typeIco = iconImage(devTypeName(dev.icon), dev.connected ? IC.accent : IC.secondary, 16)
+      typeIco.set_valign(Gtk.Align.CENTER)
       const text = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
         spacing: 1,
@@ -325,7 +327,8 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
 
       line.add(typeIco); line.add(text)
       if (dev.paired) {
-        const lock = new Gtk.Label({ label: '󰌾', visible: true }); cls(lock, 'wifi-lock-icon')
+        const lock = new Gtk.Label({ label: '󰌾', visible: true, valign: Gtk.Align.CENTER })
+        cls(lock, 'wifi-lock-icon')
         line.add(lock)
       }
 
@@ -343,6 +346,12 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
       const i = devRefs.findIndex(d => d.address === expandedAddr)
       if (i >= 0) detailPanels[i].set_visible(true)
       else expandedAddr = null
+    }
+    if (expandedAddr) {
+      GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+        try { scroll.get_vadjustment().set_value(0) } catch (_) {}
+        return GLib.SOURCE_REMOVE
+      })
     }
   }
 
@@ -394,6 +403,12 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
     else startScan()
   })
 
+  const repairAndConnect = async (address: string) => {
+    await execAsync(['bluetoothctl', 'pair', address])
+    await execAsync(['bluetoothctl', 'trust', address]).catch(() => {})
+    await execAsync(['bluetoothctl', 'connect', address])
+  }
+
   const connectDevice = async (dev: AstalBluetooth.Device) => {
     const address = dev.address
     if (busyAddresses.has(address) || dev.connecting) return
@@ -411,14 +426,24 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
         hdrLbl.set_label('Bluetooth')
       }
 
-      if (wasPaired) await dev.connect_device()
-      else dev.pair()
-      dev.trusted = true
+      if (wasPaired) {
+        await dev.connect_device()
+        try { dev.trusted = true } catch (_) {}
+      } else {
+        await repairAndConnect(address)
+      }
     } catch (e: unknown) {
       const message = errorMessage(e)
       if (closed) return
       if (/br-connection-key-missing|key.*missing|missing.*key/i.test(message)) {
-        showError('Connection failed: the stored pairing key is missing. Use Forget, then Pair & Connect again.')
+        showError('Pairing key missing — forgetting device and reconnecting…')
+        try { bt.adapter?.remove_device(dev) } catch (_) {}
+        try { await execAsync(['bluetoothctl', 'remove', address]) } catch (_) {}
+        try {
+          await repairAndConnect(address)
+        } catch (retryError: unknown) {
+          if (!closed) showError('Re-pair failed: ' + errorMessage(retryError))
+        }
       } else {
         showError("Connection failed: " + message)
       }

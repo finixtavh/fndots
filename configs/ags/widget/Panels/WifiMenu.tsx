@@ -148,8 +148,32 @@ function findIwdPaths(objects: Record<string, any>, iface: string, ssid: string)
   return { stationPath, networkPath }
 }
 
+async function busGetSystem(): Promise<Gio.DBusConnection> {
+  return new Promise((resolve, reject) => {
+    Gio.bus_get(Gio.BusType.SYSTEM, null, (_source, result) => {
+      try { resolve(Gio.bus_get_finish(result)) }
+      catch (error) { reject(error) }
+    })
+  })
+}
+
+async function fetchKnownNetworks(): Promise<Set<string>> {
+  const known = new Set<string>()
+  try {
+    const connection = await busGetSystem()
+    const objects = await iwdObjects(connection)
+    for (const interfaces of Object.values(objects)) {
+      const kn = (interfaces as Record<string, Record<string, any>>)['net.connman.iwd.KnownNetwork']
+      if (!kn) continue
+      const name = String(unpackVariant(kn.Name) ?? '')
+      if (name) known.add(name)
+    }
+  } catch (_) {}
+  return known
+}
+
 async function connectIwd(iface: string, ssid: string, passphrase: string, hidden: boolean): Promise<void> {
-  const connection = Gio.bus_get_sync(Gio.BusType.SYSTEM, null)
+  const connection = await busGetSystem()
   const objects = await iwdObjects(connection)
   const { stationPath, networkPath } = findIwdPaths(objects, iface, ssid)
   if (!stationPath) throw new Error(`iwd station not found for ${iface}`)
@@ -352,6 +376,9 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
 
   const iface = getWifiIface()
 
+  let knownNets = new Set<string>()
+  fetchKnownNetworks().then(set => { if (!closed) knownNets = set })
+
   const { BOTTOM, RIGHT } = Astal.WindowAnchor
   const win = new (Astal.Window as any)({
     gdkmonitor,
@@ -508,12 +535,13 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
       panel.add(btn)
     } else {
       const isOpen = !ap.security || ap.security === '--'
+      const isKnown = knownNets.has(ap.ssid)
       let passEntry: Gtk.Entry | null = null
 
       if (!isOpen) {
         passEntry = new Gtk.Entry({ visible: true, hexpand: true })
         passEntry.set_visibility(false)
-        passEntry.set_placeholder_text('Password…')
+        passEntry.set_placeholder_text(isKnown ? 'Saved network — password optional' : 'Password…')
         passEntry.set_input_purpose(Gtk.InputPurpose.PASSWORD)
         panel.add(passEntry)
       }
@@ -522,7 +550,7 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
       cls(btn, 'wifi-connect-btn')
       const doConnect = () => {
         const pass = passEntry?.get_text?.() ?? ''
-        if (!isOpen && !pass) {
+        if (!isOpen && !pass && !isKnown) {
           showError('Enter the network password.')
           passEntry?.grab_focus()
           return
@@ -536,7 +564,7 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
         btn.set_sensitive(false)
         btn.set_label('Connecting…')
         connectIwd(iface, ap.ssid, isOpen ? '' : pass, false)
-          .then(() => close())
+          .then(() => { knownNets.add(ap.ssid); close() })
           .catch((e: any) => {
             showError("Connection failed: " + (e?.message || e))
             btn.set_sensitive(true)
@@ -586,6 +614,7 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
       if (ap.active) cls(line, 'wifi-ap-active')
 
       const sigIco = iconImage(sigName(ap.signal), ap.active ? IC.accent : IC.secondary, 16)
+      sigIco.set_valign(Gtk.Align.CENTER)
       const text = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
         spacing: 1,
@@ -609,7 +638,7 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
 
       line.add(sigIco); line.add(text)
       if (ap.security && ap.security !== '--') {
-        const lock = new Gtk.Label({ label: '󰌾', visible: true })
+        const lock = new Gtk.Label({ label: '󰌾', visible: true, valign: Gtk.Align.CENTER })
         cls(lock, 'wifi-lock-icon')
         line.add(lock)
       }
@@ -628,6 +657,12 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
       const i = apRefs.findIndex(ap => ap.ssid === expandedSsid)
       if (i >= 0) detailPanels[i].set_visible(true)
       else expandedSsid = null
+    }
+    if (expandedSsid) {
+      GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+        try { scroll.get_vadjustment().set_value(0) } catch (_) {}
+        return GLib.SOURCE_REMOVE
+      })
     }
   }
 
