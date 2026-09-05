@@ -821,7 +821,7 @@ export default function OSD(monitors: Gdk.Monitor[]) {
   const unsubscribeOsdEvents = subscribeOsdEvents(event => {
     if (event === 'caps') {
       const generation = ++capsGeneration
-      readCapsLockState().then(next => {
+      const apply = (next: boolean | null) => {
         if (generation !== capsGeneration) return
         if (next === null) {
           try { derr('[OSD] caps state unreadable, skipping OSD') } catch (_) {}
@@ -832,6 +832,13 @@ export default function OSD(monitors: Gdk.Monitor[]) {
           key: 'caps', kind: 'caps', icon: ICONS.caps,
           value: next ? 100 : 0, state: next,
         })
+      }
+      readCapsLockState().then(apply)
+      // Release-side settle re-read
+      GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
+        if (generation !== capsGeneration) return GLib.SOURCE_REMOVE
+        readCapsLockState().then(apply)
+        return GLib.SOURCE_REMOVE
       })
       return
     }
