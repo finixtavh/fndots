@@ -382,7 +382,7 @@ validate_update_sources() {
     fi
     if path_changed apps; then
         for rel in \
-            apps/fnsession/fnsession apps/fnsession/README.md apps/fnsession/test_fnsession.py \
+            apps/fnsession/fnsession apps/fnsession/README.md \
             apps/fnnetspeed/fnnetspeed apps/fnwall/wallpicker.sh apps/fnwall/restore.sh; do
             if [[ ! -f "$DOTFILES/$rel" ]]; then
                 err "Required file is missing from the checkout: $rel"
