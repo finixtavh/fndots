@@ -12,6 +12,7 @@ import { fnDebugEnabled } from "../Helpers/FnLogCollector"
 import { AGS_CACHE_DIR, AGS_CONFIG_DIR, FNWALL_DIR, STATE_HOME } from "../Helpers/Paths"
 import { placeWindowAtPointer } from "../Helpers/Monitor"
 import { trackEscapeDismiss } from "../Helpers/FlyoutState"
+import { iconImage, IC } from "../Helpers/Icons"
 
 const EMOJI_DATA_FILE = GLib.build_filenamev([AGS_CONFIG_DIR, 'widget', 'Panels', 'emoji-data.json'])
 
@@ -999,9 +1000,7 @@ export default function DashboardPanel() {
 
           const brand = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 11, visible: true })
           brand.get_style_context().add_class('dash-brand')
-          const brandIcon = new Gtk.Image({ visible: true })
-          brandIcon.set_from_icon_name('view-grid-symbolic', Gtk.IconSize.BUTTON)
-          brandIcon.set_pixel_size(24)
+          const brandIcon = iconImage('dashboard-fill', IC.accent, 24)
           brandIcon.get_style_context().add_class('dash-brand-icon')
           brand.add(brandIcon)
           const brandCopy = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 1, visible: true })
