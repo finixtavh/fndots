@@ -33,7 +33,7 @@ window.DashboardPanel separator {
   font-size: 14px;
   font-weight: 700;
 }
-.dash-tool-nav { padding: 16px 0; margin-top: 1px; }
+.dash-tool-nav { padding: 0 0 16px 0; margin-top: 1px; }
 .dash-nav-btn {
   min-height: 48px;
   padding: 0 15px 0 17px;
@@ -324,7 +324,7 @@ entry.emoji-input:focus { border-color: t.$border-bright; }
 }
 
 .settings-nav {
-  padding: 16px 0;
+  padding: 0 0 16px 0;
   margin-top: 1px;
 }
 
