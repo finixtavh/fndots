@@ -76,19 +76,6 @@ window.DashboardPanel separator {
   font-size: 11px;
 }
 .dash-content { background: transparent; }
-.dash-footer {
-  min-height: 33px;
-  padding: 0 14px;
-
-  label { color: t.$text-muted; font-size: 10px; }
-}
-.dash-footer-key {
-  padding: 2px 6px;
-  color: t.$text-secondary;
-  background: t.$bg-inset;
-  border: 1px solid t.$border;
-  border-radius: t.$radius-sm;
-}
 
 .dash-subtab {
   background:    transparent;
@@ -158,20 +145,6 @@ window.DashboardPanel separator {
   padding: 7px 9px;
   color: t.$text-muted;
   font-size: 10px;
-}
-progressbar.wall-prog {
-  min-height: 4px;
-}
-progressbar.wall-prog trough {
-  background:    t.$overlay-10;
-  border-radius: t.$radius-xs;
-  min-height:    4px;
-  border:        none;
-}
-progressbar.wall-prog progress {
-  background:    t.$accent;
-  border-radius: t.$radius-xs;
-  min-height:    4px;
 }
 
 .cliphist-row {

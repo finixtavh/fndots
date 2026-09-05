@@ -49,8 +49,8 @@ const WALL_STATE = GLib.build_filenamev([STATE_HOME, 'fnwall', 'current'])
 
 const VIDEO_RE = /\.(mp4|mkv|webm|avi|mov|m4v)$/i
 const IMAGE_RE = /\.(png|jpe?g|gif|bmp|webp)$/i
-const THUMB_W  = 166
-const THUMB_H  = 93
+const THUMB_W  = 184
+const THUMB_H  = 103
 
 const shq = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`
 const sanitizeKey = (value: string) => value.replace(/[^a-zA-Z0-9._-]+/g, '_')
@@ -103,7 +103,6 @@ function queueScaledImage(img: Gtk.Image, path: string, w = THUMB_W, h = THUMB_H
 function loadThumb(
   file: string,
   img: Gtk.Image,
-  bar: Gtk.ProgressBar,
   video: boolean,
   width = THUMB_W,
   height = THUMB_H,
@@ -115,14 +114,11 @@ function loadThumb(
 
   if (GLib.file_test(thumb, GLib.FileTest.EXISTS)) {
     queueScaledImage(img, thumb, width, height)
-    bar.hide()
     return
   }
 
   img.set_from_icon_name(video ? 'video-x-generic-symbolic' : 'image-x-generic-symbolic', Gtk.IconSize.DIALOG)
   img.set_pixel_size(48)
-  bar.show()
-  let pulseId: any = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 90, () => { bar.pulse(); return GLib.SOURCE_CONTINUE })
 
   const seek = video ? '-ss 1 ' : ''
   const vf = fit === 'contain'
@@ -132,10 +128,6 @@ function loadThumb(
   execAsync(['bash', '-c', cmd])
     .then(() => { if (GLib.file_test(thumb, GLib.FileTest.EXISTS)) queueScaledImage(img, thumb, width, height) })
     .catch((e: any) => derr('[DashboardPanel:thumb]', e))
-    .finally(() => {
-      if (pulseId) { GLib.source_remove(pulseId); pulseId = null }
-      try { bar.set_fraction(1); bar.hide() } catch (_) {}
-    })
 }
 
 function readCurrentWallpaper(): string | null {
@@ -169,11 +161,7 @@ function wallTile(file: string, apply: (f: string) => void): Gtk.Widget {
   nameLbl.set_single_line_mode(true)
   box.add(nameLbl)
 
-  const bar = new Gtk.ProgressBar({ visible: false })
-  bar.get_style_context().add_class('wall-prog')
-  box.add(bar)
-
-  loadThumb(file, img, bar, VIDEO_RE.test(file))
+  loadThumb(file, img, VIDEO_RE.test(file))
 
   btn.add(box)
   btn.connect('clicked', () => apply(file))
@@ -1100,17 +1088,6 @@ export default function DashboardPanel() {
           openPage = select
           selectDashboardPage = select
 
-          workspace.add(new Gtk.Separator({ orientation: Gtk.Orientation.HORIZONTAL, visible: true }))
-          const footer = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 7, visible: true })
-          footer.get_style_context().add_class('dash-footer')
-          const footerName = new Gtk.Label({ label: 'Local dashboard', visible: true, xalign: 0, hexpand: true })
-          footer.add(footerName)
-          const escKey = new Gtk.Label({ label: 'Esc', visible: true })
-          escKey.get_style_context().add_class('dash-footer-key')
-          footer.add(escKey)
-          footer.add(new Gtk.Label({ label: 'to close', visible: true }))
-          workspace.add(footer)
-
           applyResponsiveLayout = (compact: boolean) => {
             const rootContext = root.get_style_context()
             if (compact) rootContext.add_class('compact')
@@ -1130,7 +1107,7 @@ export default function DashboardPanel() {
             sidebar.set_child_packing(brandDivider, false, false, 0, Gtk.PackType.START)
             sidebar.set_child_packing(nav, compact, true, 0, Gtk.PackType.START)
             contentWrap.set_margin_top(compact ? 16 : 20)
-            contentWrap.set_margin_bottom(compact ? 14 : 16)
+            contentWrap.set_margin_bottom(10)
             contentWrap.set_margin_start(compact ? 14 : 24)
             contentWrap.set_margin_end(compact ? 14 : 24)
             dashboardLayoutHooks.forEach(hook => hook(compact))
