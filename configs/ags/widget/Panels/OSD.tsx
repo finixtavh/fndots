@@ -776,8 +776,8 @@ export default function OSD(monitors: Gdk.Monitor[]) {
     }, 120)
   }
 
-  let keymap: Gdk.Keymap | null = null
   let caps = false
+  let capsGeneration = 0
   let showDefaultMute: ((kind: 'output' | 'input', force?: boolean) => void) | null = null
 
   async function readCapsLockState(): Promise<boolean> {
@@ -790,30 +790,14 @@ export default function OSD(monitors: Gdk.Monitor[]) {
       const anyKb = keyboards.find((kb: any) => typeof kb?.capsLock === 'boolean')
       if (anyKb) return !!anyKb.capsLock
     } catch (_) {}
-    try { if (keymap) return !!keymap.get_caps_lock_state() } catch (_) {}
     return caps
-  }
-  try {
-    const defaultKeymap = Gdk.Keymap.get_default()
-    if (defaultKeymap) {
-      keymap = defaultKeymap
-      caps = defaultKeymap.get_caps_lock_state()
-      const id = defaultKeymap.connect("state-changed", () => {
-        const nextCaps = defaultKeymap.get_caps_lock_state()
-        if (nextCaps !== caps) {
-          caps = nextCaps
-          show({ key: "caps", kind: "caps", icon: ICONS.caps, value: caps ? 100 : 0, state: caps })
-        }
-      })
-      signalCleanups.push(() => { try { defaultKeymap.disconnect(id) } catch (_) {} })
-    }
-  } catch (error) {
-    dwarn("[OSD] lock-key monitoring failed:", error)
   }
 
   const unsubscribeOsdEvents = subscribeOsdEvents(event => {
     if (event === 'caps') {
+      const generation = ++capsGeneration
       readCapsLockState().then(next => {
+        if (generation !== capsGeneration) return
         caps = next
         show({
           key: 'caps', kind: 'caps', icon: ICONS.caps,
