@@ -345,7 +345,7 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
           grid.attach(mkActionBtn('refresh', 'Restart Bar', false, () => {
             runAction(['bash', '-c', 'ags quit -i ags-bar; sleep 0.3; nohup "$1" >/dev/null 2>&1 &', 'restart-bar', AGS_LAUNCHER])
           }), 0, 0, 1, 1)
-          grid.attach(mkActionBtn('dashboard', 'Dashboard', false, () => {
+          grid.attach(mkActionBtn('dashboard-fill', 'Dashboard', false, () => {
             runAction(['ags', 'toggle', '-i', 'ags-bar', 'dashboard'])
           }), 1, 0, 1, 1)
           grid.attach(mkActionBtn('power', 'Power', true, () => {

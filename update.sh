@@ -6,7 +6,7 @@ umask 077
 
 usage() {
     cat <<'EOF'
-Usage: update.sh [--all] [--no-backup]
+Usage: update.sh [--all] [--no-backup] [--net-backend=MODE]
 
 Pull the dotfiles repository and deploy only the managed directories changed by
 the new commits. By default, existing files are preserved below XDG_STATE_HOME ( aka ~/ ).
@@ -15,6 +15,10 @@ Options:
   --all     Deploy every managed config and FN application, even with no new commit/s in the Github repo.
   --no-backup
             Do not retain previous dotfiles below XDG_STATE_HOME.
+  --net-backend=MODE
+            Switch the Wi-Fi stack now: nm-iwd (NetworkManager with iwd
+            backend) or iwd-only (NetworkManager disabled). You will be
+            asked to confirm before services are changed.
   -h, --help
             Show this.
 EOF
@@ -22,6 +26,7 @@ EOF
 
 UPDATE_ALL=0
 UPDATE_NO_BACKUP=0
+UPDATE_NET_BACKEND=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --all)
@@ -29,6 +34,16 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-backup)
             UPDATE_NO_BACKUP=1
+            ;;
+        --net-backend=*)
+            UPDATE_NET_BACKEND="${1#*=}"
+            case "$UPDATE_NET_BACKEND" in
+                nm-iwd|iwd-only) ;;
+                *)
+                    printf 'update.sh: invalid network backend: %s (expected nm-iwd or iwd-only)\n' "$UPDATE_NET_BACKEND" >&2
+                    exit 2
+                    ;;
+            esac
             ;;
         -h | --help)
             usage
@@ -48,6 +63,7 @@ rebuild_update_args() {
     UPDATE_ARGS=()
     [[ $UPDATE_ALL -eq 0 ]] || UPDATE_ARGS+=(--all)
     [[ $UPDATE_NO_BACKUP -eq 0 ]] || UPDATE_ARGS+=(--no-backup)
+    [[ -z "${UPDATE_NET_BACKEND:-}" ]] || UPDATE_ARGS+=(--net-backend="$UPDATE_NET_BACKEND")
 }
 rebuild_update_args
 UPDATE_REEXECUTED="${FNDOTS_UPDATE_REEXECUTED:-0}"
@@ -526,6 +542,9 @@ main() {
         configure_appimage_mime || warn "AppImage MIME associations could not be refreshed."
     fi
     clear_pending_update
+    if [[ -n "${UPDATE_NET_BACKEND:-}" ]]; then
+        NET_BACKEND="$UPDATE_NET_BACKEND" configure_network_backend || warn "Network backend could not be switched."
+    fi
     print_update_done
 }
 

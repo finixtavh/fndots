@@ -18,7 +18,7 @@ step()   { echo -e "${BOLD}  ▸ $*${N}"; }
 
 usage() {
     cat <<'EOF'
-Usage: install.sh [--no-backup] [--keyboard=LAYOUT]
+Usage: install.sh [--no-backup] [--keyboard=LAYOUT] [--net-backend=MODE]
 
 Options:
   --no-backup
@@ -26,6 +26,11 @@ Options:
   --keyboard=LAYOUT
             Set the XKB keyboard layout used by Hyprland. Defaults to latam.
             Comma-separated layouts such as us,latam are accepted.
+  --net-backend=MODE
+            Wi-Fi stack: nm-iwd (NetworkManager with iwd backend, keeps
+            nmcli/VPN indicator) or iwd-only (NetworkManager disabled).
+            Defaults to nm-iwd. You will be asked to confirm before
+            services are changed.
   -h, --help
             Show this.
 EOF
@@ -34,6 +39,8 @@ EOF
 NO_BACKUP=0
 KEYBOARD_LAYOUT="latam"
 KEYBOARD_EXPLICIT=0
+NET_BACKEND="nm-iwd"
+NET_BACKEND_EXPLICIT=0
 
 valid_keyboard_layout() {
     [[ "$1" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*(,[A-Za-z0-9][A-Za-z0-9_-]*)*$ ]]
@@ -60,6 +67,17 @@ parse_install_args() {
                     return 2
                 }
                 KEYBOARD_EXPLICIT=1
+                ;;
+            --net-backend=*)
+                NET_BACKEND="${1#*=}"
+                case "$NET_BACKEND" in
+                    nm-iwd|iwd-only) ;;
+                    *)
+                        printf 'install.sh: invalid network backend: %s (expected nm-iwd or iwd-only)\n' "$NET_BACKEND" >&2
+                        return 2
+                        ;;
+                esac
+                NET_BACKEND_EXPLICIT=1
                 ;;
             -h | --help)
                 usage
@@ -1235,9 +1253,135 @@ configure_logind() {
     ok "HandlePowerKey=ignore written; it will take effect after reboot"
 }
 
+# Ask before changing system/user services. Usage:
+#   confirm_service_change "prompt" [default-yes: 1|0]
+# Returns 0 on yes. Non-interactive sessions proceed automatically.
+# Safe to source under `set -Eeuo pipefail` (update.sh).
+confirm_service_change() {
+    local prompt="$1" def_yes="${2:-1}"
+    if [[ ! -t 0 ]]; then
+        info "Non-interactive session: proceeding ($prompt)."
+        return 0
+    fi
+    local ans="" suffix="[Y/n]"
+    [[ "$def_yes" == "1" ]] || suffix="[y/N]"
+    read -rp "  $prompt $suffix " ans || ans=""
+    if [[ "$def_yes" == "1" ]]; then
+        [[ -z "$ans" || "$ans" == [yY]* ]]
+    else
+        [[ "$ans" == [yY]* ]]
+    fi
+}
+
+# Wi-Fi backend: nm-iwd (NetworkManager with iwd backend) or iwd-only.
+# Selectable via --net-backend= and re-applied by update.sh --net-backend=.
+# The choice is recorded below $STATE_HOME/fndots/net-backend.
+configure_network_backend() {
+    local mode="${1:-$NET_BACKEND}"
+    case "$mode" in
+        nm-iwd|iwd-only) ;;
+        *)
+            err "Unknown network backend: $mode (expected nm-iwd or iwd-only)."
+            return 1
+            ;;
+    esac
+    header "Network backend ($mode)"
+
+    local state_dir="$STATE_HOME/fndots"
+    mkdir -p -- "$state_dir" || {
+        err "Could not create state dir: $state_dir."
+        return 1
+    }
+
+    local nm_conf="/etc/NetworkManager/conf.d/iwd-backend.conf"
+    local expected=$'[device]\nwifi.backend=iwd'
+
+    local state_file="$state_dir/net-backend"
+    local recorded=""
+    if [[ -f "$state_file" ]]; then
+        recorded="$(cat -- "$state_file" 2>/dev/null || true)"
+        recorded="$(printf '%s' "$recorded" | tr -d '[:space:]')"
+    fi
+    local changing=0
+    case "$recorded" in
+        nm-iwd|iwd-only)
+            [[ "$recorded" != "$mode" ]] && changing=1
+            ;;
+    esac
+
+    if [[ $changing -eq 1 ]]; then
+        echo "  Current backend: ${recorded} -> requested: ${mode}."
+        confirm_service_change "Switch network backend? Services will restart and connectivity may drop briefly." 0 \
+            || { info "Keeping backend '$recorded' (switch declined)."; return 0; }
+    elif [[ "$mode" == "iwd-only" ]]; then
+        confirm_service_change "Disable NetworkManager and leave iwd alone? nmcli-based indicators will stop working." 1 \
+            || { info "Network backend setup skipped by user."; return 0; }
+    else
+        confirm_service_change "Apply backend 'nm-iwd' (NetworkManager with iwd backend; services may restart briefly)?" 1 \
+            || { info "Network backend setup skipped by user."; return 0; }
+    fi
+
+    if [[ "$mode" == "iwd-only" ]]; then
+        if [[ -f "$nm_conf" ]]; then
+            sudo rm -f -- "$nm_conf" || warn "Could not remove $nm_conf."
+        fi
+        if sudo systemctl disable --now NetworkManager; then
+            ok "NetworkManager disabled (iwd manages Wi-Fi alone)"
+        else
+            warn "NetworkManager could not be disabled."
+        fi
+        if sudo systemctl enable --now iwd.service; then
+            ok "iwd.service enabled and started"
+        else
+            warn "iwd.service could not be enabled."
+        fi
+    else
+        local nm_was_active=0
+        if systemctl is-active --quiet NetworkManager; then
+            nm_was_active=1
+        fi
+        local conf_changed=0
+        if [[ ! -f "$nm_conf" ]] || [[ "$(sudo cat "$nm_conf" 2>/dev/null)" != "$expected" ]]; then
+            if printf '%s\n' "$expected" | sudo tee "$nm_conf" > /dev/null \
+                && [[ "$(sudo cat "$nm_conf" 2>/dev/null)" == "$expected" ]]; then
+                ok "NetworkManager will use iwd as Wi-Fi backend"
+                conf_changed=1
+            else
+                err "Could not write $nm_conf."
+                return 1
+            fi
+        else
+            ok "NetworkManager iwd backend config is already correct"
+        fi
+        if sudo systemctl enable --now NetworkManager; then
+            ok "NetworkManager enabled and started"
+        else
+            warn "NetworkManager could not be enabled."
+        fi
+        if [[ $conf_changed -eq 1 && $nm_was_active -eq 1 ]]; then
+            if sudo systemctl restart NetworkManager; then
+                ok "NetworkManager restarted to apply the backend"
+            else
+                warn "NetworkManager restart failed; reboot to apply the backend."
+            fi
+        fi
+        if sudo systemctl enable --now iwd.service; then
+            ok "iwd.service enabled and started"
+        else
+            warn "iwd.service could not be enabled."
+        fi
+    fi
+
+    printf '%s\n' "$mode" > "$state_dir/net-backend" || warn "Could not record the backend choice."
+    ok "Network backend set to $mode"
+}
+
 # Enable services 
 enable_services() {
     header "Available services"
+
+    confirm_service_change "Enable required services (PipeWire audio, iwd, Bluetooth)?" 1 \
+        || { info "Service setup skipped by user."; return 0; }
 
     local svc failed=0
     for svc in pipewire.socket pipewire-pulse.socket wireplumber.service; do
@@ -1282,6 +1426,7 @@ print_done() {
     echo -e "  fnsession: ${C}$HOME/.local/bin/fnsession${N}"
     echo -e "  fnnetspeed: ${C}$HOME/.local/bin/fnnetspeed${N}"
     echo -e "  Keyboard: ${C}$KEYBOARD_LAYOUT${N}"
+    echo -e "  Network: ${C}$NET_BACKEND${N}"
     echo -e "  Lyrics: ${C}$HOME/lyrics${N}"
     if [[ -d "$BACKUP_ROOT" ]]; then
         echo -e "  Previous configs: ${C}$BACKUP_ROOT${N}"
@@ -1336,6 +1481,7 @@ main() {
     configure_appimage_mime || warn "AppImage MIME associations could not be configured."
     configure_logind || warn "The power-key integration could not be configured."
     enable_services || warn "PipeWire user services could not be enabled in this session."
+    configure_network_backend || warn "Network backend could not be configured."
     print_done
 }
 

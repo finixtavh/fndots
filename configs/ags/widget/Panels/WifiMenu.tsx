@@ -765,13 +765,25 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
       })
   }
 
-  const doRescan = (reportErrors = false) => {
+  const doRescan = (reportErrors = false, attempt = 0) => {
     const generation = ++scanGeneration
     hdrLbl.set_label('Scanning…')
     requestWifiScan(iface)
       .catch((error: unknown) => {
-        if (!closed && generation === scanGeneration && reportErrors)
-          showError('Scan failed: ' + (error instanceof Error ? error.message : String(error)))
+        if (closed || generation !== scanGeneration) return
+        // Retry once: transient driver hiccup
+        if (attempt < 1) {
+          GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
+            if (!closed && generation === scanGeneration) doRescan(reportErrors, attempt + 1)
+            return GLib.SOURCE_REMOVE
+          })
+          return
+        }
+        if (!reportErrors) return
+        const detail = (error instanceof Error ? error.message : String(error ?? '')).trim()
+        showError(detail
+          ? `Scan failed (${iface}): ${detail}`
+          : `Scan failed on ${iface}: iwctl gave no details (see journalctl -u iwd)`)
       })
       .then(() => {
         if (closed || generation !== scanGeneration) return
