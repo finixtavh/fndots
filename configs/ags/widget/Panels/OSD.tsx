@@ -5,7 +5,7 @@ import { execAsync } from "ags/process"
 import GLib from "gi://GLib"
 import AstalHyprland from "gi://AstalHyprland"
 import AstalWp from "gi://AstalWp"
-import { dwarn, logFn } from "../Helpers/DashLog"
+import { dwarn, derr, logFn } from "../Helpers/DashLog"
 import { FN_DEBUG } from "../Helpers/FnLogCollector"
 import { REDUCED_MOTION } from "../Helpers/Perf"
 import {
@@ -780,7 +780,32 @@ export default function OSD(monitors: Gdk.Monitor[]) {
   let capsGeneration = 0
   let showDefaultMute: ((kind: 'output' | 'input', force?: boolean) => void) | null = null
 
-  async function readCapsLockState(): Promise<boolean> {
+  // Kernel LED ground truth, sync read
+  function readCapsSysfs(): boolean | null {
+    try {
+      const dir = GLib.Dir.open('/sys/class/leds', 0)
+      if (!dir) return null
+      let found = false
+      let on = false
+      for (;;) {
+        let name: string | null = null
+        try { name = dir.read_name() } catch (_) { break }
+        if (name === null) break
+        if (!name.toLowerCase().includes('capslock')) continue
+        found = true
+        try {
+          const [ok, raw] = GLib.file_get_contents(`/sys/class/leds/${name}/brightness`)
+          if (ok && decoder.decode(raw).trim() !== '0') on = true
+        } catch (_) {}
+      }
+      try { dir.close() } catch (_) {}
+      return found ? on : null
+    } catch (_) { return null }
+  }
+
+  async function readCapsLockState(): Promise<boolean | null> {
+    const sys = readCapsSysfs()
+    if (sys !== null) return sys
     try {
       const out = await execAsync(['hyprctl', 'devices', '-j'])
       const j = JSON.parse(out)
@@ -790,7 +815,7 @@ export default function OSD(monitors: Gdk.Monitor[]) {
       const anyKb = keyboards.find((kb: any) => typeof kb?.capsLock === 'boolean')
       if (anyKb) return !!anyKb.capsLock
     } catch (_) {}
-    return caps
+    return null
   }
 
   const unsubscribeOsdEvents = subscribeOsdEvents(event => {
@@ -798,6 +823,10 @@ export default function OSD(monitors: Gdk.Monitor[]) {
       const generation = ++capsGeneration
       readCapsLockState().then(next => {
         if (generation !== capsGeneration) return
+        if (next === null) {
+          try { derr('[OSD] caps state unreadable, skipping OSD') } catch (_) {}
+          return
+        }
         caps = next
         show({
           key: 'caps', kind: 'caps', icon: ICONS.caps,
