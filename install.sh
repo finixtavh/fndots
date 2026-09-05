@@ -518,7 +518,7 @@ install_deps() {
     header "System packages (pacman)"
 
     install_pacman \
-        base-devel git curl wget mold \
+        base-devel git curl \
         \
         hyprland xdg-desktop-portal-hyprland hyprlock hyprpicker \
         \
@@ -534,18 +534,16 @@ install_deps() {
         libnotify \
         \
         mpv ffmpeg awww \
-        alsa-lib libpulse vulkan-icd-loader \
         \
-        gjs gtk3 gtk-layer-shell gobject-introspection \
         dart-sass \
         \
-        xdg-user-dirs xdg-utils jq python lua libxml2 desktop-file-utils yt-dlp rofi qt6ct \
-        fontconfig librsvg hypridle hyprsunset \
+        xdg-utils jq python yt-dlp qt6ct \
+        hypridle hyprsunset \
         \
-        zsh starship pyenv fzf lsd bat jdk25-openjdk \
+        zsh starship pyenv fzf lsd bat \
         zsh-autosuggestions zsh-history-substring-search zsh-syntax-highlighting \
         \
-        woff2-font-awesome ttf-jetbrains-mono-nerd \
+        ttf-jetbrains-mono-nerd \
         noto-fonts noto-fonts-emoji noto-fonts-cjk \
         \
         polkit-kde-agent \
@@ -562,10 +560,9 @@ install_deps() {
     install_aur \
         aylurs-gtk-shell \
         libastal-git \
-        libastal-4-git \
         libastal-apps-git \
         libastal-bluetooth-git \
-        libastal-wifi-git \
+        libastal-network-git \
         libastal-hyprland-git \
         libastal-mpris-git \
         libastal-notifd-git \
@@ -648,13 +645,13 @@ require_network_stack() {
     if [[ ! -x /usr/lib/bluetooth/bluetoothd ]] && ! command -v bluetoothd &>/dev/null; then
         missing+=("bluez bluez-utils")
     fi
-    pkg_installed libastal-wifi-git || missing+=("libastal-wifi-git")
+    pkg_installed libastal-network-git || missing+=("libastal-network-git")
     pkg_installed libastal-bluetooth-git || missing+=("libastal-bluetooth-git")
     if (( ${#missing[@]} > 0 )); then
         err "Missing required Wi-Fi/Bluetooth dependencies: ${missing[*]}."
         return 1
     fi
-    ok "Wi-Fi/Bluetooth stack present (iwd, BlueZ, libastal-wifi, libastal-bluetooth)"
+    ok "Wi-Fi/Bluetooth stack present (iwd, BlueZ, libastal-network, libastal-bluetooth)"
 }
 
 # Clone repo 
@@ -1181,8 +1178,8 @@ deploy_config_tree() {
 install_configs() {
     header "Install config files"
     local rel dst
-    local required_dirs=(ags hypr rofi zsh thunar)
-    local optional_dirs=(kitty dunst gtk-3.0 gtk-4.0 Kvantum)
+    local required_dirs=(ags hypr zsh thunar)
+    local optional_dirs=(kitty rofi dunst gtk-3.0 gtk-4.0 Kvantum)
 
     for rel in "${required_dirs[@]}"; do
         dst="$CFG/$rel"

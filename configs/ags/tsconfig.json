@@ -100,8 +100,8 @@
       "gi://AstalBluetooth": [
         "./@girs/astalbluetooth-0.1"
       ],
-      "gi://AstalWifi": [
-        "./@girs/astalwifi-0.1"
+      "gi://AstalNetwork": [
+        "./@girs/astalnetwork-0.1"
       ],
       "gi://AstalApps": [
         "./@girs/astalapps-0.1"
