@@ -571,7 +571,13 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
         connectIwd(iface, ap.ssid, isOpen ? '' : pass, false)
           .then(() => { knownNets.add(ap.ssid); close() })
           .catch((e: any) => {
-            showError("Connection failed: " + (e?.message || e))
+            if (!isOpen && !pass && isKnown) {
+              showError('Saved password rejected — type it manually.', { silent: true })
+              showError("Connection failed: " + (e?.message || e))
+              passEntry?.grab_focus()
+            } else {
+              showError("Connection failed: " + (e?.message || e))
+            }
             btn.set_sensitive(true)
             btn.set_label('󰤨  Connect')
           })
