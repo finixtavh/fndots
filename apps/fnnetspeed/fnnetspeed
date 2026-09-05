@@ -118,7 +118,7 @@ class TestState:
         self.done = threading.Event()
         self.phase = "preparing"
         self.network = "Detecting network"
-        self.interface = "—"
+        self.interface = "-"
         self.latency: float | None = None
         self.upload = Metric()
         self.download = Metric()
@@ -303,7 +303,7 @@ def paint(text: str, name: str, enabled: bool, bold: bool = False) -> str:
 
 def metric_value(value: float, ready: bool) -> tuple[str, str]:
     if not ready:
-        return "— Mbps", "— MB/s"
+        return "- Mbps", "- MB/s"
     return f"{value:7.1f} Mbps", f"{value / 8:6.2f} MB/s"
 
 
@@ -401,7 +401,7 @@ def render(state: TestState, color_enabled: bool) -> list[str]:
     phase = str(data["phase"])
     identity = f"{data['network']} · {data['interface']}"[: max(width - 3, 1)]
     latency = data["latency"]
-    latency_label = f"{latency:.1f} ms" if isinstance(latency, (int, float)) else "— ms"
+    latency_label = f"{latency:.1f} ms" if isinstance(latency, (int, float)) else "- ms"
 
     lines = [
         paint(identity, "muted", color_enabled),

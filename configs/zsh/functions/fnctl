@@ -9,7 +9,7 @@ local cache_home="${XDG_CACHE_HOME:-}"
 
 _fnctl_help() {
   cat <<'EOF'
-fnctl — Finixtavh dotfiles control utility
+fnctl - Finixtavh dotfiles control utility
 
 Usage:
   fnctl <command> [arguments]
@@ -133,7 +133,7 @@ _fnctl_unexpected_args() {
       elif command -v ditto &>/dev/null; then
         ditto
       else
-        echo "ditto not found — build it first (see install.sh)"
+        echo "ditto not found - build it first (see install.sh)"
       fi
       ;;
     config)
@@ -360,7 +360,7 @@ finally:
         os.unlink(temporary_name)
     except FileNotFoundError:
         pass
-print(f'Blacklisted: "{title}" — "{artist}"')
+print(f'Blacklisted: "{title}" - "{artist}"')
 PY
       ;;
     *)

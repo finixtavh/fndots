@@ -171,7 +171,7 @@ trap 'exit 130' HUP INT TERM
 echo "Saved current lowEndDevice = $ORIG (restored at end)"
 
 echo
-echo ">> Phase A — Low-end OFF … restarting AGS, settling ${SETTLE_SEC}s"
+echo ">> Phase A - Low-end OFF … restarting AGS, settling ${SETTLE_SEC}s"
 if ! set_lowend false; then
   echo "Could not enable the Phase A setting; benchmark aborted." >&2
   exit 1
@@ -180,7 +180,7 @@ restart_ags
 sleep "$SETTLE_SEC"
 A=$(measure_phase)
 
-echo ">> Phase B — Low-end ON  … restarting AGS, settling ${SETTLE_SEC}s"
+echo ">> Phase B - Low-end ON  … restarting AGS, settling ${SETTLE_SEC}s"
 if ! set_lowend true; then
   echo "Could not enable the Phase B setting; benchmark aborted." >&2
   exit 1

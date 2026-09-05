@@ -157,11 +157,11 @@ export function fetchLrclib(artist: string, track: string, album: string, durati
   if (LOW_END) return Promise.resolve(null)
   if (!artist || !track || durationSec <= 0) return Promise.resolve(null)
   if (isLrclibBlacklisted(artist, track)) {
-    logEvent('lrclib', 'blacklist', `"${track}" — "${artist}"`)
+    logEvent('lrclib', 'blacklist', `"${track}" - "${artist}"`)
     return Promise.resolve(null)
   }
   if (isLrclibMissFresh(artist, track)) {
-    logEvent('lrclib', 'cache', `"${track}" — "${artist}"`)
+    logEvent('lrclib', 'cache', `"${track}" - "${artist}"`)
     return Promise.resolve(null)
   }
 
@@ -185,7 +185,7 @@ export function fetchLrclib(artist: string, track: string, album: string, durati
     if (includeAlbum && album) params.album_name = album
     const url = `${LRCLIB_BASE}/search?${qsEncode(params)}`
     const tag = includeAlbum && album ? '' : ' [no album]'
-    logEvent('lrclib', 'req', `request  "${qTrack}" — "${qArtist}"  (${Math.round(durationSec)}s)${tag}`, url)
+    logEvent('lrclib', 'req', `request  "${qTrack}" - "${qArtist}"  (${Math.round(durationSec)}s)${tag}`, url)
     return execAsync([
       'curl', '-fsS', '-A', 'FNDots (https://github.com/finixtavh/dotfiles-v2)',
       '--retry', '2', '--retry-delay', '1', '--retry-connrefused',
@@ -195,19 +195,19 @@ export function fetchLrclib(artist: string, track: string, album: string, durati
 
   const found = (hit: LrclibTrack): LrclibTrack => {
     clearLrclibMiss(artist, track)
-    logEvent('lrclib', 'lyr', `${hit.syncedLyrics ? 'lyrics found' : 'instrumental'} #${hit.id}  ${hit.trackName} — ${hit.artistName}`)
+    logEvent('lrclib', 'lyr', `${hit.syncedLyrics ? 'lyrics found' : 'instrumental'} #${hit.id}  ${hit.trackName} - ${hit.artistName}`)
     return hit
   }
   const miss = (): null => {
     recordLrclibMiss(artist, track)
-    logEvent('lrclib', 'nolyr', `no lyrics found → cached 30d  "${track}" — "${artist}"`)
+    logEvent('lrclib', 'nolyr', `no lyrics found → cached 30d  "${track}" - "${artist}"`)
     return null
   }
   const candidates = lyricQueryCandidates(artist, track)
   const tryNext = (index: number, includeAlbum: boolean): Promise<LrclibTrack | null> => {
     if (index >= candidates.length) {
       // If nothing matched with the album filter applied, retry every candidate
-      // once more without it — a mismatched album (deluxe/reissue/compilation)
+      // once more without it - a mismatched album (deluxe/reissue/compilation)
       // shouldn't be able to hide a result the plain track+artist search would find.
       if (includeAlbum && album) return tryNext(0, false)
       return Promise.resolve(miss())
@@ -219,7 +219,7 @@ export function fetchLrclib(artist: string, track: string, album: string, durati
 
   return tryNext(0, true)
     .catch((e: any) => {
-      logEvent('lrclib', 'neterr', `network error / unreachable  "${track}" — "${artist}"`, String(e))
+      logEvent('lrclib', 'neterr', `network error / unreachable  "${track}" - "${artist}"`, String(e))
       return null
     })
 }

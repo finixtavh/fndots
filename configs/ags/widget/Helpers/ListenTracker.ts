@@ -1,4 +1,4 @@
-// ListenTracker — singleton background tracker for listening history and scrobbling
+// ListenTracker background history tracker
 import AstalMpris from "gi://AstalMpris"
 import GLib from "gi://GLib"
 import { createBinding, createEffect } from "ags"

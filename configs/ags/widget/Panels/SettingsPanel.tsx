@@ -633,7 +633,7 @@ function buildPerformancePage(): Gtk.Box {
       'ags-cache-size', ...targetPaths,
     ])
       .then((s: string) => sizeLbl.set_label(`Cache size: ${s.trim() || '0'}`))
-      .catch(() => sizeLbl.set_label('Cache size: —'))
+      .catch(() => sizeLbl.set_label('Cache size: -'))
   }
   refreshSize()
 

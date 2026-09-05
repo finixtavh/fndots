@@ -419,7 +419,7 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
 
   const showConnectError = (message: string) => {
     if (isAgentError(message)) {
-      showError('Pairing needs confirmation on the device — pair from system Bluetooth settings, then Connect.')
+      showError('Pairing needs confirmation on the device - pair from system Bluetooth settings, then Connect.')
     } else {
       showError("Connection failed: " + message)
     }
@@ -452,7 +452,7 @@ export function openBluetoothMenu(gdkmonitor: Gdk.Monitor): () => void {
       const message = errorMessage(e)
       if (closed) return
       if (/br-connection-key-missing|key.*missing|missing.*key/i.test(message)) {
-        showError('Pairing key missing — forgetting device and reconnecting…')
+        showError('Pairing key missing - forgetting device and reconnecting…')
         try { bt.adapter?.remove_device(dev) } catch (_) {}
         try { await execAsync(['bluetoothctl', 'remove', address]) } catch (_) {}
         try {

@@ -225,7 +225,7 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
           })
 
           const titleRow = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 8, visible: true })
-          const titleIco = iconImage('bell', IC.accent, 16)
+          const titleIco = iconImage('bell-fill', IC.accent, 16)
           const titleLbl = new Gtk.Label({ label: 'Notifications', visible: true, xalign: 0, hexpand: true })
           titleLbl.get_style_context().add_class('notif-panel-title')
           titleRow.add(titleIco); titleRow.add(titleLbl)
@@ -339,7 +339,7 @@ export default function NotificationCenter(gdkmonitor: Gdk.Monitor) {
             const ctx = nightBtn.get_style_context()
             if (nightEnabled) ctx.add_class('notif-action-active')
             else ctx.remove_class('notif-action-active')
-            nightBtn.set_tooltip_text(nightEnabled ? 'Night Light — On · 4000 K' : 'Night Light — Off')
+            nightBtn.set_tooltip_text(nightEnabled ? 'Night Light - On · 4000 K' : 'Night Light - Off')
           }
 
           grid.attach(mkActionBtn('refresh', 'Restart Bar', false, () => {

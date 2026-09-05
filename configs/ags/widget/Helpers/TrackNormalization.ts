@@ -1,19 +1,19 @@
 // Track Normalization
 const NOISE_TAG = /\s*[\[(（【]\s*(?:official\s+(?:music\s+)?video|official\s+audio|lyrics?|lyric\s+video|visuali[sz]er|remaster(?:ed)?(?:\s+\d{4})?|live(?:\s+at|\s+from)?[^\])）】]*|radio\s+edit|explicit|sped\s*up|slowed(?:\s*\+\s*reverb)?|nightcore|karaoke|hd|4k)\s*[\])）】]/gi
-const PROVIDER_SUFFIX = /\s*[-–—|]\s*(?:YouTube(?:\s+Music)?|SoundCloud|Spotify|Vimeo|Bandcamp|Topic)\s*$/i
+const PROVIDER_SUFFIX = /\s*[-–\u2014|]\s*(?:YouTube(?:\s+Music)?|SoundCloud|Spotify|Vimeo|Bandcamp|Topic)\s*$/i
 
 export function normalizeText(value: string): string {
   return String(value ?? '')
     .normalize('NFKC')
     .replace(/[\u200b-\u200d\ufeff]/g, '')
-    .replace(/[‐‑‒–—―]/g, '-')
+    .replace(/[‐‑‒–\u2014―]/g, '-')
     .replace(/\s+/g, ' ')
     .trim()
 }
 
 export function cleanArtist(value: string): string {
   return normalizeText(value)
-    .replace(/\s*[-–—|]\s*Topic\s*$/i, '')
+    .replace(/\s*[-–\u2014|]\s*Topic\s*$/i, '')
     .replace(/\s*VEVO\s*$/i, '')
     .replace(/\s*\((?:official|music)\)\s*$/i, '')
     .trim()

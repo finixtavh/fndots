@@ -546,7 +546,7 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
       if (!isOpen) {
         passEntry = new Gtk.Entry({ visible: true, hexpand: true })
         passEntry.set_visibility(false)
-        passEntry.set_placeholder_text(isKnown ? 'Saved network — password optional' : 'Password…')
+        passEntry.set_placeholder_text(isKnown ? 'Saved network - password optional' : 'Password…')
         passEntry.set_input_purpose(Gtk.InputPurpose.PASSWORD)
         panel.add(passEntry)
       }
@@ -572,7 +572,7 @@ export function openWifiMenu(gdkmonitor: Gdk.Monitor): () => void {
           .then(() => { knownNets.add(ap.ssid); close() })
           .catch((e: any) => {
             if (!isOpen && !pass && isKnown) {
-              showError('Saved password rejected — type it manually.', { silent: true })
+              showError('Saved password rejected - type it manually.', { silent: true })
               showError("Connection failed: " + (e?.message || e))
               passEntry?.grab_focus()
             } else {

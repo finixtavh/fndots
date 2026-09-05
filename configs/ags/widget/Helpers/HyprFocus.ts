@@ -1,4 +1,4 @@
-// HyprFocus — safe Hyprland focus helpers (argv-array, no shell interpolation)
+// HyprFocus safe focus helpers
 import { execAsync } from "ags/process"
 import { derr } from "./DashLog"
 

@@ -199,7 +199,7 @@ function buildFnWallPage(): Gtk.Box {
   const libraryTitle = new Gtk.Label({ label: 'Live folder', visible: true, xalign: 0, hexpand: true })
   libraryTitle.get_style_context().add_class('fnwall-library-title')
   libraryHead.add(libraryTitle)
-  const librarySort = new Gtk.Label({ label: 'Sorted A—Z', visible: true, xalign: 1 })
+  const librarySort = new Gtk.Label({ label: 'Sorted A-Z', visible: true, xalign: 1 })
   librarySort.get_style_context().add_class('fnwall-library-sort')
   libraryHead.add(librarySort)
   library.add(libraryHead)
@@ -250,7 +250,7 @@ function buildFnWallPage(): Gtk.Box {
     execAsync(['bash', WALLPICKER, file])
       .then(() => {
         showCurrent(file)
-        librarySort.set_label('Sorted A—Z')
+        librarySort.set_label('Sorted A-Z')
         librarySort.set_tooltip_text(null)
       })
       .catch(() => {

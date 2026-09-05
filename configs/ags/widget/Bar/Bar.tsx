@@ -341,7 +341,7 @@ function NetworkWidget({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   const iwdAvailable = GLib.find_program_in_path('iwctl') !== null
   const [netIcon,  setNetIcon]  = createState('wifi-off')
   const [netTip,   setNetTip]   = createState(
-    iwdAvailable ? 'Wi-Fi disconnected' : 'Wi-Fi unavailable — install iwd',
+    iwdAvailable ? 'Disconnected' : 'Wi-Fi unavailable - install iwd',
   )
 
   let wifiMenuClose: (() => void) | null = null
@@ -356,11 +356,11 @@ function NetworkWidget({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
     if (now - lastLookupAt < 15_000) return
     lastLookupAt = now
     const generation = ++lookupGeneration
-    queryWifiName(iface).then(name => {
-      if (!alive || generation !== lookupGeneration || getPrimaryIface() !== iface) return
-      if (name) wifiName = name
-      setNetTip(wifiName || 'Wi-Fi connected')
-    }).catch(() => {})
+      queryWifiName(iface).then(name => {
+        if (!alive || generation !== lookupGeneration || getPrimaryIface() !== iface) return
+        wifiName = name
+        setNetTip(name || 'Disconnected')
+      }).catch(() => {})
   }
 
   const poll = () => {
@@ -375,17 +375,14 @@ function NetworkWidget({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
 
       if (!iwdAvailable) {
         setNetIcon('wifi-off')
-        setNetTip('Wi-Fi unavailable — install iwd')
-      } else if (!iface) {
-        setNetIcon('wifi-off')
-        setNetTip('Wi-Fi disconnected')
-      } else if (isWirelessIface(iface)) {
-        setNetIcon('wifi')
-        setNetTip(wifiName || 'Wi-Fi connected')
-        refreshWifiName(iface)
+        setNetTip('Wi-Fi unavailable - install iwd')
+      } else if (!iface || !isWirelessIface(iface)) {
+        setNetIcon(iface ? 'ethernet' : 'wifi-off')
+        setNetTip('Disconnected')
       } else {
-        setNetIcon('ethernet')
-        setNetTip('Ethernet')
+        setNetIcon('wifi')
+        setNetTip(wifiName || 'Disconnected')
+        refreshWifiName(iface)
       }
     } catch (_) {}
   }
@@ -421,7 +418,7 @@ function NetworkWidget({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
 function BluetoothWidget({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   const [btIcon, setBtIcon] = createState('bt')
   const [btVis,  setBtVis]  = createState(false)
-  const [btTip,  setBtTip]  = createState('Bluetooth off')
+  const [btTip,  setBtTip]  = createState('Disconnected')
   let menuClose: (() => void) | null = null
   const unsubs: Array<() => void> = []
   let deviceUnsubs: Array<() => void> = []
@@ -453,7 +450,7 @@ function BluetoothWidget({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
 
         if (!hasAdapter()) {
           setBtVis(false)
-          setBtTip('Bluetooth unavailable')
+          setBtTip('Disconnected')
           return
         }
         const powered   = bt.isPowered ?? bt.is_powered ?? false
@@ -468,9 +465,7 @@ function BluetoothWidget({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
         )]
         setBtVis(true)
         setBtIcon(powered || connected ? 'bt' : 'bt-off')
-        setBtTip(names.length > 0
-          ? names.join(', ')
-          : powered ? 'Bluetooth — no devices connected' : 'Bluetooth off')
+        setBtTip(names.length > 0 ? names.join(', ') : 'Disconnected')
       } catch (_) {}
     }
 
