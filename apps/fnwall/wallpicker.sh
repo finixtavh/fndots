@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# FNWall ""backend"" for aww and mpvpaper
+# FNWall ""backend"" for aww and mpvpaper.
 
 set -u
 
