@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# FNWall ""backend"" for aww and mpvpaper
+# FNWall for awww, mpvpaper, orbit 
 
 set -u
 
@@ -31,11 +31,21 @@ save_state() {
     return 0
 }
 
+stop_orbit() {
+    command -v orbit-wallpaper-control >/dev/null 2>&1 || return 0
+    if systemctl --user is-active --quiet orbit-wallpaper-engine.service 2>/dev/null; then
+        systemctl --user stop orbit-wallpaper-engine.service >/dev/null 2>&1 || true
+    else
+        orbit-wallpaper-control exit >/dev/null 2>&1 || true
+    fi
+}
+
 apply_wallpaper() {
     local file="$1"
     local extension="${file##*.}"
     extension="${extension,,}"
 
+    stop_orbit
     case "$extension" in
         mp4|mkv|webm|avi|mov|m4v)
             pkill -x mpvpaper   2>/dev/null

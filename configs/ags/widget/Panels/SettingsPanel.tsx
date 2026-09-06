@@ -15,6 +15,7 @@ import { loadSettings, saveSettings } from "../Helpers/UserSettings"
 import { AGS_CACHE_DIR, AGS_CONFIG_DIR, HYPR_CONFIG_DIR } from "../Helpers/Paths"
 import { placeWindowAtPointer } from "../Helpers/Monitor"
 import { trackEscapeDismiss } from "../Helpers/FlyoutState"
+import { setOrbitReactiveEnabled } from "../Helpers/OrbitReactive"
 import { setChromaArtworkPaletteEnabled } from "../Bar/MusicBar"
 import { IC, iconImage } from "../Helpers/Icons"
 
@@ -208,6 +209,23 @@ function buildMusicBarPage(): Gtk.Box {
     state => {
       saveSettings({ chromaArtworkPalette: state })
       setChromaArtworkPaletteEnabled(state)
+    },
+  )
+
+  page.add(new Gtk.Separator({ orientation: Gtk.Orientation.HORIZONTAL, visible: true }))
+
+  const orbitSec = new Gtk.Label({ label: 'ORBIT WALLPAPER', visible: true, xalign: 0 })
+  orbitSec.get_style_context().add_class('settings-section')
+  page.add(orbitSec)
+
+  settingsSwitchRow(
+    page,
+    'Reactive appearance',
+    'Pulse the wallpaper palette with music energy. Disable for a static palette.',
+    settings.orbitReactive !== false,
+    state => {
+      saveSettings({ orbitReactive: state })
+      setOrbitReactiveEnabled(state)
     },
   )
 

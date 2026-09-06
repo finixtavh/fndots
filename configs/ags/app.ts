@@ -22,6 +22,7 @@ import {
 } from "./widget/Helpers/FlyoutState"
 import { AGS_CONFIG_DIR } from "./widget/Helpers/Paths"
 import { emitOsdEvent } from "./widget/Helpers/OsdEvents"
+import { ensureOrbitReactiveStarted } from "./widget/Helpers/OrbitReactive"
 
 const FOCUS_FIX_SCRIPT = GLib.build_filenamev([AGS_CONFIG_DIR, 'scripts', 'hypr-focus-fix.py'])
 const FOCUS_FIX_PKILL_RE = `^/usr/bin/python3 .*/${FOCUS_FIX_SCRIPT.split('/').pop()!.replace(/\./g, '\\.')}$`
@@ -77,6 +78,7 @@ app.start({
       app.connect('shutdown', stopFnLogCollector)
     }
     startHyprFocusFix()
+    ensureOrbitReactiveStarted()
     app.connect('shutdown', stopHyprFocusFix)
     const monitors = app.get_monitors()
     monitors.forEach(monitor => {
