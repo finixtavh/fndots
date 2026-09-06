@@ -2,6 +2,7 @@
   "cavaAutoHz": true,
   "cavaManualHz": 60,
   "chromaArtworkPalette": true,
+  "orbitReactive": true,
   "historyIntervalS": 30,
   "batteryChargeLimit80": true,
   "lowEndDevice": false,

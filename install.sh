@@ -543,7 +543,7 @@ install_deps() {
         pipewire pipewire-alsa pipewire-pulse wireplumber \
         gst-plugin-pipewire \
         \
-        playerctl brightnessctl pavucontrol 7zip libarchive \
+        playerctl brightnessctl pavucontrol cava 7zip libarchive \
         \
         grim slurp swappy wl-clipboard cliphist \
         \

@@ -723,6 +723,64 @@ def read_session(name: str | None) -> tuple[Path, dict[str, Any]]:
 
     return path, payload
 
+def scrub_sessions(apply_changes: bool) -> int:
+
+    try:
+        paths = sorted(path for path in SESSION_DIR.glob("*.json") if path.is_file())
+    except OSError as error:
+        raise FnSessionError(f"could not scan {SESSION_DIR}: {error}") from error
+
+    changed_files = 0
+    failures = 0
+    for path in paths:
+        if path.is_symlink():
+            print(f"Warning: refusing to scrub symlink {path}", file=sys.stderr)
+            failures += 1
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            print(f"Warning: could not inspect {path}: {error}", file=sys.stderr)
+            failures += 1
+            continue
+        windows = payload.get("windows") if isinstance(payload, dict) else None
+        if not isinstance(windows, list):
+            print(f"Warning: {path} is not a recognized fnsession file", file=sys.stderr)
+            failures += 1
+            continue
+
+        changed = False
+        for window in windows:
+            if not isinstance(window, dict):
+                continue
+            original = window.get("command", [])
+            sanitized = minimal_launch_command(
+                original,
+                str(window.get("initial_class") or ""),
+                str(window.get("class") or ""),
+            )
+            if original != sanitized:
+                window["command"] = sanitized
+                changed = True
+            if "cwd" in window:
+                window.pop("cwd", None)
+                changed = True
+
+        if not changed:
+            continue
+        changed_files += 1
+        if apply_changes:
+            try:
+                atomic_json_write(path, payload)
+            except OSError as error:
+                print(f"Warning: could not scrub {path}: {error}", file=sys.stderr)
+                failures += 1
+
+    verb = "Scrubbed" if apply_changes else "Found"
+    suffix = "" if apply_changes else " (dry run; use --apply to rewrite them)"
+    print(f"{verb} {changed_files} session file(s) with legacy process context{suffix}.")
+    return 1 if failures else 0
+
 def normalized(value: Any) -> str:
     return str(value or "").strip().casefold()
 
@@ -1325,6 +1383,15 @@ def parser() -> argparse.ArgumentParser:
         default=WATCH_INTERVAL,
         help=f"poll interval in seconds (default: {WATCH_INTERVAL:g})",
     )
+    scrub = commands.add_parser(
+        "scrub",
+        help="find or remove legacy argv/cwd data from saved sessions",
+    )
+    scrub.add_argument(
+        "--apply",
+        action="store_true",
+        help="atomically rewrite affected files (default: dry run)",
+    )
     return cli
 
 def main() -> int:
@@ -1334,6 +1401,8 @@ def main() -> int:
             return save_session(arguments.name, quiet=arguments.quiet)
         if arguments.action == "watch":
             return watch_session(arguments.name, arguments.interval)
+        if arguments.action == "scrub":
+            return scrub_sessions(arguments.apply)
         if arguments.action == "list":
             return list_sessions(arguments.json)
         return load_session(arguments.name)
